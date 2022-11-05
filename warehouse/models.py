@@ -20,7 +20,7 @@ class Product(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     slug = models.SlugField(blank=True, null=True)
-    warehouse = warehouse = models.ForeignKey(Warehouse, related_name='products', on_delete=models.CASCADE)
+    warehouse = models.ForeignKey(Warehouse, related_name='products', on_delete=models.CASCADE)
 
 
     def __str__(self):
