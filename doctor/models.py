@@ -17,27 +17,23 @@ class Order(models.Model):
 
     status = models.CharField(max_length=20, default=Status.PROCESSING, choices=Status.choices)
     created = models.DateTimeField(auto_now=True)
-    price = models.FloatField()
+    price = models.FloatField(blank=True)
     required_date = models.DateTimeField(auto_now=True)
     shipped_date = models.DateTimeField(auto_now_add=True)
     doctor = models.ForeignKey(Doctor, related_name="doctor_orders", on_delete=models.DO_NOTHING)
     delivery_worker = models.ForeignKey(DeliveryWorker, related_name="delivery_worker_orders", on_delete=models.DO_NOTHING)
-    # items = models.ManyToManyField(Product, through='OrderItem', related_name='orders')
+    items = models.ManyToManyField(Product, through='OrderProduct', related_name='orders')
 
-
-    def __str__(self):
-        return self.name
-
-    
+    def __str__(self) -> str:
+        return str(self.doctor) + '->'
     def _calc_price(self):
         # order_items = OrderItem.objects.filter(order=self)
         # total = sum([each_item.price * each_item.consume_quantity for each_item in order_items])
-        return 'total'
+        return 1
 
     
     def save(self, *args, **kwargs) -> None:
         self.price = self._calc_price()
-        slugify_instance_name(self)
         return super().save(*args, **kwargs)
 
 
@@ -54,7 +50,7 @@ class OrderProduct(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.IntegerField(default=1)
     discount = models.FloatField(default=0)
-    price = models.FloatField()
+    price = models.FloatField(blank=True)
 
     def _calc_price(self):
         price_value = self.quantity * self.product.price
