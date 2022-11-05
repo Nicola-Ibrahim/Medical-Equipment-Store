@@ -12,8 +12,11 @@ class IsWarehousePermission(permissions.DjangoModelPermissions):
         'DELETE': ['%(app_label)s.delete_%(model_name)s'],
     }
 
+    
+
     def has_object_permission(self, request, view, obj):
 
         # Check if the warehouse is author of a product
-        if(obj.user == request.user):
+        
+        if(obj.warehouse == request.user):
             return True
