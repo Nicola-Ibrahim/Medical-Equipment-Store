@@ -1,0 +1,74 @@
+from django.db import models
+from accounts.models import Doctor, DeliveryWorker
+from warehouse.models import Product
+from .utils import slugify_instance_name
+
+
+# Create your models here.
+
+class Order(models.Model):
+   
+    class Status(models.TextChoices):
+        # Order status: 1 = Pending; 2 = Processing; 3 = Rejected; 4 = Completed
+        PENDING = 'PENDING', 'Pending'
+        PROCESSING = 'PROCESSING', 'Processing'
+        REJECTED = 'REJECTED', 'Rejected'
+        COMPLETED = 'COMPLETED', 'Completed'
+
+    status = models.CharField(max_length=20, default=Status.PROCESSING, choices=Status.choices)
+    created = models.DateTimeField(auto_now=True)
+    price = models.FloatField()
+    required_date = models.DateTimeField(auto_now=True)
+    shipped_date = models.DateTimeField(auto_now_add=True)
+    doctor = models.ForeignKey(Doctor, related_name="doctor_orders", on_delete=models.DO_NOTHING)
+    delivery_worker = models.ForeignKey(DeliveryWorker, related_name="delivery_worker_orders", on_delete=models.DO_NOTHING)
+    # items = models.ManyToManyField(Product, through='OrderItem', related_name='orders')
+
+
+    def __str__(self):
+        return self.name
+
+    
+    def _calc_price(self):
+        # order_items = OrderItem.objects.filter(order=self)
+        # total = sum([each_item.price * each_item.consume_quantity for each_item in order_items])
+        return 'total'
+
+    
+    def save(self, *args, **kwargs) -> None:
+        self.price = self._calc_price()
+        slugify_instance_name(self)
+        return super().save(*args, **kwargs)
+
+
+    # def is_available(self, consume_quantity:int):
+    #     diff = self.quantity - consume_quantity
+
+    #     # Abort process if the available quantity bellow 0 value
+    #     if(diff < 0):
+    #         raise exceptions.ValidationError(f"You exceed the number of available for the {self.name}:{self.base_quantity} / should be {diff} or les")
+
+
+class OrderProduct(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.IntegerField(default=1)
+    discount = models.FloatField(default=0)
+    price = models.FloatField()
+
+    def _calc_price(self):
+        price_value = self.quantity * self.product.price
+        if(self.discount > 0):
+            price_value *=  self.discount / 100
+        return price_value
+
+
+    def save(self, *args, **kwargs):
+        self.price = self._calc_price()
+        return super().save(*args, **kwargs)
+
+
+    def __str__(self):
+        return f"Order-{str(self.order.id)} -> {str(self.product)}"
+
+    
