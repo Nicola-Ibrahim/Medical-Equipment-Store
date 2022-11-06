@@ -10,6 +10,9 @@ from .models import (
     DeliveryWorkerAccountant
 )
 
+from .profiles import WarehouseProfile
+
+
 from django.contrib.auth.admin import UserAdmin as DjangoUserAdmin
 # from django.utils.translation import ugettext_lazy as _
 
@@ -22,7 +25,9 @@ admin.site.register([
     Admin, 
     BaseAccountant, 
     WarehouseAccountant, 
-    DeliveryWorkerAccountant
+    DeliveryWorkerAccountant,
+    
+    WarehouseProfile
 ])
 
 
@@ -39,7 +44,7 @@ class UserAdmin(DjangoUserAdmin):
         (None, {'fields': ('email', 'password')}),
         (('Personal info'), {'fields': ('first_name', 'last_name')}),
         (('Permissions'), {'fields': ('is_active', 'is_staff', 'is_superuser',
-                                        'groups', 'user_permissions')}),
+                                        'groups', 'user_permissions', 'type')}),
         (('Important dates'), {'fields': ('last_login', 'date_joined')}),
     )
     add_fieldsets = (
