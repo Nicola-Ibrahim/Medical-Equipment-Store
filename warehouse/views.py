@@ -1,12 +1,12 @@
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from .models import Product 
 from .serializers import ProductSerializer
-from accounts.mixins import WarehousePermissionMixin
+from accounts.mixins import PermissionMixin
 from .mixins import WarehouseQuerySetMixin
 
 # Create your views here.
 class ProductsListView(
-    WarehousePermissionMixin,
+    PermissionMixin,
     WarehouseQuerySetMixin,
     ListCreateAPIView):
 
@@ -15,7 +15,7 @@ class ProductsListView(
 
 
 class ProductRetrieveView(
-    WarehousePermissionMixin,
+    PermissionMixin,
     RetrieveUpdateDestroyAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
