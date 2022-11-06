@@ -4,15 +4,6 @@ from .utils import slugify_instance_name
 from accounts.models import Warehouse
 
 # Create your models here.
-
-class WarehouseProfile(models.Model):
-    warehouse = models.ForeignKey(Warehouse, related_name='details', on_delete=models.CASCADE)
-    service = models.CharField(max_length=200)
-    working_hours = models.FloatField()
-    sections = models.IntegerField()
-    profit_percentage = models.FloatField()
-
-
 class Product(models.Model):
     name = models.CharField(max_length=200)
     price = models.FloatField()
