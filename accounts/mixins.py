@@ -1,6 +1,6 @@
-from .permissions import IsWarehousePermission
+from .permissions import CustomDjangoModelPermission
 from rest_framework import permissions
 
-class WarehousePermissionMixin():
-    permission_classes = [IsWarehousePermission, permissions.IsAuthenticated]
+class PermissionMixin():
+    permission_classes = [CustomDjangoModelPermission, permissions.IsAuthenticated]
 
