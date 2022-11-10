@@ -1,5 +1,4 @@
 from django.db import models
-from django.core import exceptions
 from .utils import slugify_instance_name
 from accounts.models import Warehouse
 
@@ -18,9 +17,10 @@ class Product(models.Model):
         return self.name
 
     
-    def save(self, *args, **kwargs) -> None:
+    def save(self, *args, **kwargs):
         slugify_instance_name(self)
         return super().save(*args, **kwargs)
+
 
 
     # def is_available(self, consume_quantity:int):
