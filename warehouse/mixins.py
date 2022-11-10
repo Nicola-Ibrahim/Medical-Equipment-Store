@@ -1,5 +1,7 @@
 from accounts.models import User
 from .models import Product
+from doctor.models import Order, OrderProduct
+
 
 class ProductQuerySetMixin:
     def get_queryset(self, *args, **kwargs):
@@ -25,9 +27,10 @@ class WarehouseOrdersQuerySetMixin:
         Display all products if the user is admin
         """
         
-        qs = super().get_queryset(*args, **kwargs)
+        qs = OrderProduct.objects.all()
         
         warehouse_products_qs = Product.objects.filter(warehouse=self.request.user)
-        qs = qs.select_related('order').filter(product__in=warehouse_products_qs)
-
+        qs = qs.filter(product__in=warehouse_products_qs).select_related('order')
+        order_ids = [item['order'] for item in qs.values('order')]
+        qs = Order.objects.filter(id__in=order_ids)
         return qs
