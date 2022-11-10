@@ -39,7 +39,6 @@ class OrderSerializer(serializers.ModelSerializer):
 
     doctor_name = serializers.ReadOnlyField(source='doctor.doctor_details.first_name')
 
-    # related_customer_orders = OrdersInlineSerializer(source='customer.customer_orders.all', many=True, read_only=True)
 
     # M2M relation field
     items = serializers.SerializerMethodField()
@@ -73,15 +72,6 @@ class OrderSerializer(serializers.ModelSerializer):
         return OrderProductsSerializer(qs, many=True, context=self.context).data
 
 
-    def update(self, instance, validated_data):
-        # Restrict update for warehouse only on flags field
-        user = self.context['request'].user
-        if(isinstance(user, Warehouse)):
-            print(instance)
-            print(validated_data)
-
-            
-        return super().update(instance, validated_data)
         
     # def to_internal_value(self, data):
     #     """Change the inserting data from str to num for model"""
@@ -89,7 +79,7 @@ class OrderSerializer(serializers.ModelSerializer):
         
     #     data['customer'] = Customer.objects.get(username=data.get('customer'))
     #     data['staff'] = Staff.objects.get(username=data.get('staff'))
-      
+
 
     #     for item in data.get('items'):
     #         if(isinstance(item['item'], str)):
