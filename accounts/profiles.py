@@ -65,8 +65,8 @@ class DoctorProfile(models.Model):
         return self.first_name +' '+ self.last_name
 
 
-class DoctorProfile(models.Model):
-    delivery_worker = models.OneToOneField(Doctor, related_name='doctor_details', on_delete=models.CASCADE)
+class AdminProfile(models.Model):
+    admin = models.OneToOneField(Admin, related_name='admin_details', on_delete=models.CASCADE)
     first_name = models.CharField(max_length=200)
     last_name = models.CharField(max_length=200)
     
