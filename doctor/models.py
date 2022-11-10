@@ -21,7 +21,7 @@ class Order(models.Model):
     required_date = models.DateTimeField(auto_now=True)
     shipped_date = models.DateTimeField(auto_now_add=True)
     doctor = models.ForeignKey(Doctor, related_name="doctor_orders", on_delete=models.CASCADE)
-    delivery_worker = models.ForeignKey(DeliveryWorker, related_name="delivery_worker_orders", on_delete=models.DO_NOTHING)
+    delivery_worker = models.ForeignKey(DeliveryWorker, related_name="delivery_worker_orders", on_delete=models.SET_NULL, null=True)
     accepted = models.BooleanField(default=False)
     submitted = models.BooleanField(default=False)
     delivered = models.BooleanField(default=False)
