@@ -1,11 +1,14 @@
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, ListAPIView, UpdateAPIView
 
 from .models import Product 
 from .serializers import ProductSerializer, WarehouseOrdersSerializer
 from .mixins import ProductQuerySetMixin, WarehouseOrdersQuerySetMixin
 
+
 from accounts.mixins import PermissionMixin
-from doctor.models import OrderProduct
+from doctor.models import Order
+
+
 
 # Create your views here.
 class ProductsListView(
@@ -37,7 +40,7 @@ class ProductRetrieveView(
 
 class WarehouseOrdersListView(
     WarehouseOrdersQuerySetMixin,
-    ListCreateAPIView):
+    ListAPIView):
 
     """
     Obtain all related orders
@@ -45,9 +48,20 @@ class WarehouseOrdersListView(
     Make inner join between OrderProduct table 
     and Product table where warehouse == current user
     """
-
-    queryset = OrderProduct.objects.all()
     serializer_class = WarehouseOrdersSerializer
 
 
-    
+class WarehouseOrdersUpdateView(
+    PermissionMixin,
+    RetrieveUpdateDestroyAPIView):
+
+    """
+    Obtain all related orders
+    -----
+    Make inner join between OrderProduct table 
+    and Product table where warehouse == current user
+    """
+    queryset = Order.objects.all()
+    serializer_class = WarehouseOrdersSerializer
+
+
