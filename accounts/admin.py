@@ -1,16 +1,7 @@
 from django.contrib import admin
-from .models import (
-    User, 
-    Warehouse, 
-    DeliveryWorker, 
-    Doctor, 
-    Admin, 
-    BaseAccountant, 
-    WarehouseAccountant, 
-    DeliveryWorkerAccountant
-)
+from .models import *
 
-from .profiles import WarehouseProfile
+from .profiles import *
 
 
 from django.contrib.auth.admin import UserAdmin as DjangoUserAdmin
@@ -27,7 +18,12 @@ admin.site.register([
     WarehouseAccountant, 
     DeliveryWorkerAccountant,
     
-    WarehouseProfile
+    WarehouseProfile,
+    DoctorProfile,
+    DeliveryWorkerProfile,
+    BaseAccountantProfile,
+    DeliveryWorkerAccountantProfile,
+    WarehouseAccountantProfile
 ])
 
 
