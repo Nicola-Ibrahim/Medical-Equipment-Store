@@ -4,9 +4,9 @@ from django.db import models
 
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-from django.db.models.signals import post_save
-from django.core.exceptions import ValidationError
-from django.db.models import Q
+from django.contrib.auth.models import Group
+
+from .permissions import PermissionGroupsName
 from .models_manager import *
 
 # Create your models here.
@@ -31,11 +31,11 @@ class User(AbstractUser):
 
     # Set username to none
     username = None
-    # first_name = None
-    # last_name = None
+    first_name = None
+    last_name = None
 
 
-    email = models.EmailField(('email address'), unique=True)
+    email = models.EmailField(('email address'), unique=True, validators=[validate_email])
     USERNAME_FIELD = 'email'
 
     # Remove email from required fields
@@ -71,7 +71,6 @@ class Doctor(User):
 
 class DeliveryWorker(User):
 
-    
     class Meta:
         proxy = True
 
@@ -85,6 +84,12 @@ class DeliveryWorker(User):
 
 
 
+class WarehouseManager(UserManager):
+
+    def get_queryset(self):
+        result = super().get_queryset()
+        return result.filter(type=self.user_type)
+
 class Warehouse(User):
 
     
@@ -97,6 +102,7 @@ class Warehouse(User):
 
     def save(self, *args, **kwargs) -> None:
         self.type = User.Type.WAREHOUSE
+        # Assign the use to specific group permission
         return super().save(*args, **kwargs)
 
 

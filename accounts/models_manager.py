@@ -1,4 +1,5 @@
 from django.contrib.auth.models import BaseUserManager
+from django.core.validators import validate_email
 
 
 class UserManager(BaseUserManager):
@@ -7,13 +8,15 @@ class UserManager(BaseUserManager):
     """
 
     def __init__(self, user_type):
-        super().__init__()
         self.user_type = user_type
+        super().__init__()
 
     def _create_user(self, email, password, **extra_fields):
         """Create and save a User with the given email and password."""
         if not email or len(email) <= 0:
             raise ValueError('The given email must be set')
+
+        validate_email(email)
 
         email = self.normalize_email(email)
         user = self.model(email=email, **extra_fields)
@@ -54,6 +57,7 @@ class DeliveryWorkerManager(UserManager):
 
 
 class WarehouseManager(UserManager):
+
     def get_queryset(self):
         result = super().get_queryset()
         return result.filter(type=self.user_type)
