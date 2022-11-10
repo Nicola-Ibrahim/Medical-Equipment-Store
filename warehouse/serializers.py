@@ -1,8 +1,7 @@
 from .models import Product
-from doctor.models import OrderProduct
+from doctor.models import Order
 
 from rest_framework import serializers
-
 
 class ProductSerializer(serializers.ModelSerializer):
 
@@ -46,7 +45,31 @@ class ProductSerializer(serializers.ModelSerializer):
 
 
 class WarehouseOrdersSerializer(serializers.ModelSerializer):
+    """
+    This serializer only used to update order flags:
+    [accepted, submitted, delivered]
+
+    """
+
+    url = serializers.HyperlinkedIdentityField(
+        view_name='warehouse:order-update',
+        lookup_field='pk',
+        read_only=True
+    )
+
     class Meta:
-        model = OrderProduct
-        fields = '__all__'
-    
+        model = Order
+        fields = [
+            'id', 
+            'url',
+            'price',
+            'status',
+            'accepted',
+            'submitted',
+            'delivered',
+            'items',
+            # 'related_customer_orders', 
+            
+        ]
+        read_only_fields = ['price', 'status']
+        write_only_fields = ['accepted', 'submitted', 'delivered']  
