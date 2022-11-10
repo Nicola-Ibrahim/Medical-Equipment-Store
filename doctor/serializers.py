@@ -1,9 +1,7 @@
 
 from rest_framework import serializers
 from .models import Order, OrderProduct
-# from production.models import Product
-# from accounts.models import Customer, Staff
-# from accounts.serializers import CustomersSerializer, StaffSerializer
+from accounts.models import Warehouse
 # from django.db.models import Q
 
 
@@ -17,25 +15,29 @@ class OrdersInlineSerializer(serializers.Serializer):
 class OrderProductsSerializer(serializers.ModelSerializer):
 
     product_name = serializers.ReadOnlyField(source='product.name')
-    warehouse_name = serializers.ReadOnlyField(source='product.warehouse.first_name')
+    warehouse_name = serializers.ReadOnlyField(source='product.warehouse.warehouse_details.name')
+    
     class Meta:
         model = OrderProduct
-        # fields = [
-        #     'price',
-        #     'quantity',
-        #     'product_name',
-        #     'warehouse_name',
-        # ]
-        fields = '__all__'
+        fields = [
+            'product_name',
+            'warehouse_name',
+            'quantity',
+            'discount',
+            'price',
+        ]
+       
 
 class OrderSerializer(serializers.ModelSerializer):
 
     # Add extra read_only field
     url = serializers.HyperlinkedIdentityField(
-        view_name='order-detail',
+        view_name='doctor:order-details',
         lookup_field='pk',
         read_only=True
     )
+
+    doctor_name = serializers.ReadOnlyField(source='doctor.doctor_details.first_name')
 
     # related_customer_orders = OrdersInlineSerializer(source='customer.customer_orders.all', many=True, read_only=True)
 
@@ -47,8 +49,12 @@ class OrderSerializer(serializers.ModelSerializer):
         fields = [
             'id', 
             'url', 
+            'doctor_name',
             'price',
             'status',
+            'accepted',
+            'submitted',
+            'delivered',
             'items',
             # 'related_customer_orders', 
 
@@ -59,15 +65,24 @@ class OrderSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['id']
         write_only_fields = ['doctor']
-
     
     def get_items(self, obj):
         """Custom Method-field to display related items in a specific shape"""
-        print(obj)
         # Retrieve the sold items that relate to order 
         qs = OrderProduct.objects.filter(order=obj)
         return OrderProductsSerializer(qs, many=True, context=self.context).data
 
+
+    def update(self, instance, validated_data):
+        # Restrict update for warehouse only on flags field
+        user = self.context['request'].user
+        if(isinstance(user, Warehouse)):
+            print(instance)
+            print(validated_data)
+
+            
+        return super().update(instance, validated_data)
+        
     # def to_internal_value(self, data):
     #     """Change the inserting data from str to num for model"""
 
