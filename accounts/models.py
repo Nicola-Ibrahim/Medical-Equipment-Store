@@ -13,8 +13,7 @@ from .models_manager import *
 
 class User(AbstractUser):
 
-    user_type = 'Admin'
-
+    user_type = None
     objects = UserManager(user_type)
 
     class Type(models.TextChoices):
@@ -48,7 +47,7 @@ class User(AbstractUser):
     street = models.CharField(max_length=50, null=True, blank=True)
     zipcode = models.IntegerField(null=True, blank=True)
     identification = models.IntegerField(null=True, blank=True)
-    type = models.CharField(max_length=50, choices=Type.choices, blank=True, default=user_type)
+    type = models.CharField(max_length=50, choices=Type.choices, blank=True, default=Type.ADMIN)
     manager = models.ForeignKey("Admin", on_delete=models.SET_NULL, null=True, blank=True)
 
 
@@ -177,5 +176,5 @@ class Admin(User):
     def save(self, *args, **kwargs) -> None:
         self.is_staff = True
         self.is_superuser = True
-        self.type = User.Type.ADMIN
+        self.type = User.Type.ADMIN.value
         return super().save(*args, **kwargs)
