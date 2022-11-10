@@ -20,12 +20,16 @@ class Order(models.Model):
     price = models.FloatField(blank=True)
     required_date = models.DateTimeField(auto_now=True)
     shipped_date = models.DateTimeField(auto_now_add=True)
-    doctor = models.ForeignKey(Doctor, related_name="doctor_orders", on_delete=models.DO_NOTHING)
+    doctor = models.ForeignKey(Doctor, related_name="doctor_orders", on_delete=models.CASCADE)
     delivery_worker = models.ForeignKey(DeliveryWorker, related_name="delivery_worker_orders", on_delete=models.DO_NOTHING)
+    accepted = models.BooleanField(default=False)
+    submitted = models.BooleanField(default=False)
+    delivered = models.BooleanField(default=False)
     items = models.ManyToManyField(Product, through='OrderProduct', related_name='orders')
 
     def __str__(self) -> str:
-        return str(self.doctor) + '->'
+        return f"order-{self.id} by -> " + str(self.doctor)
+
     def _calc_price(self):
         # order_items = OrderItem.objects.filter(order=self)
         # total = sum([each_item.price * each_item.consume_quantity for each_item in order_items])
@@ -51,6 +55,7 @@ class OrderProduct(models.Model):
     quantity = models.IntegerField(default=1)
     discount = models.FloatField(default=0)
     price = models.FloatField(blank=True)
+    
 
     def _calc_price(self):
         price_value = self.quantity * self.product.price
