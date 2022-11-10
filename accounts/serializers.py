@@ -16,8 +16,8 @@ class WarehouseProfileSerializer(serializers.ModelSerializer):
 
 class WarehouseSerializer(serializers.ModelSerializer):
 
-    # Reverse M2M relation
-    details = WarehouseProfileSerializer(many=True, read_only=True)
+    # Reverse relation
+    details = WarehouseProfileSerializer(source='warehouse_details', many=True, read_only=True)
 
     class Meta:
         model = Warehouse
