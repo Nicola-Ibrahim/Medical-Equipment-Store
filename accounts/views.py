@@ -10,3 +10,9 @@ class WarehouseListView(
     serializer_class = WarehouseSerializer
 
 
+class WarehouseRetrieveView(
+    RetrieveUpdateDestroyAPIView):
+
+    queryset = Warehouse.objects.all()
+    serializer_class = WarehouseSerializer
+
