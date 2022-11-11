@@ -7,7 +7,7 @@ from accounts.models import *
 ## Accountants ###
 #################
 class BaseAccountantProfile(models.Model):
-    base_accountant = models.OneToOneField(BaseAccountant, related_name='base_accountant_details', on_delete=models.CASCADE)
+    base_accountant = models.OneToOneField(BaseAccountant, related_name='base_accountant_profile', on_delete=models.CASCADE)
     first_name = models.CharField(max_length=200)
     last_name = models.CharField(max_length=200)
     
@@ -16,7 +16,7 @@ class BaseAccountantProfile(models.Model):
         return self.first_name +' '+ self.last_name
 
 class DeliveryWorkerAccountantProfile(models.Model):
-    delivery_worker_accountant = models.OneToOneField(DeliveryWorkerAccountant, related_name='delivery_worker_accountant_details', on_delete=models.CASCADE)
+    delivery_worker_accountant = models.OneToOneField(DeliveryWorkerAccountant, related_name='delivery_worker_accountant_profile', on_delete=models.CASCADE)
     first_name = models.CharField(max_length=200)
     last_name = models.CharField(max_length=200)
     
@@ -26,7 +26,7 @@ class DeliveryWorkerAccountantProfile(models.Model):
 
 
 class WarehouseAccountantProfile(models.Model):
-    warehouse_accountant = models.OneToOneField(WarehouseAccountant, related_name='warehouse_accountant_details', on_delete=models.CASCADE)
+    warehouse_accountant = models.OneToOneField(WarehouseAccountant, related_name='warehouse_accountant_profile', on_delete=models.CASCADE)
     first_name = models.CharField(max_length=200)
     last_name = models.CharField(max_length=200)
     
@@ -35,17 +35,20 @@ class WarehouseAccountantProfile(models.Model):
         return self.first_name +' '+ self.last_name
 
 class WarehouseProfile(models.Model):
-    warehouse = models.OneToOneField(Warehouse, related_name='warehouse_details', on_delete=models.CASCADE)
+    warehouse = models.OneToOneField(Warehouse, related_name='warehouse_profile', on_delete=models.CASCADE, blank=True, null=True)
     name = models.CharField(max_length=200)
     service = models.CharField(max_length=200)
     working_hours = models.FloatField()
     sections = models.IntegerField()
     profit_percentage = models.FloatField()
 
+    def __str__(self) -> str:
+        return self.name
+
 
 
 class DeliveryWorkerProfile(models.Model):
-    delivery_worker = models.OneToOneField(DeliveryWorker, related_name='delivery_worker_details', on_delete=models.CASCADE)
+    delivery_worker = models.OneToOneField(DeliveryWorker, related_name='delivery_worker_profile', on_delete=models.CASCADE)
     first_name = models.CharField(max_length=200)
     last_name = models.CharField(max_length=200)
     distance = models.FloatField(max_length=200)
@@ -57,7 +60,7 @@ class DeliveryWorkerProfile(models.Model):
 
 
 class DoctorProfile(models.Model):
-    doctor = models.OneToOneField(Doctor, related_name='doctor_details', on_delete=models.CASCADE)
+    doctor = models.OneToOneField(Doctor, related_name='doctor_profile', on_delete=models.CASCADE)
     first_name = models.CharField(max_length=200)
     last_name = models.CharField(max_length=200)
     
@@ -66,7 +69,16 @@ class DoctorProfile(models.Model):
 
 
 class AdminProfile(models.Model):
-    admin = models.OneToOneField(Admin, related_name='admin_details', on_delete=models.CASCADE)
+    admin = models.OneToOneField(Admin, related_name='admin_profile', on_delete=models.CASCADE)
+    first_name = models.CharField(max_length=200)
+    last_name = models.CharField(max_length=200)
+    
+    def __str__(self) -> str:
+        return self.first_name +' '+ self.last_name
+
+
+class StatisticianProfile(models.Model):
+    statistician = models.OneToOneField(Statistician, related_name='statistician_profile', on_delete=models.CASCADE)
     first_name = models.CharField(max_length=200)
     last_name = models.CharField(max_length=200)
     
