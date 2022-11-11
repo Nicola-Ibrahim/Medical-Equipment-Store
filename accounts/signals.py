@@ -17,11 +17,15 @@ from .permissions import PermissionGroupsName
 def assign_group(sender, instance, **kwargs):
     """Assign permission group to the user"""
 
-    # Get the warehouse permission group 
-    perm_group = Group.objects.get(name=PermissionGroupsName.WAREHOUSE_GROUP.value) 
+    # Get the warehouse permission groups
+    perm_groups = Group.objects.filter(name__in = [
+        PermissionGroupsName.WAREHOUSE_GROUP.value,
+        PermissionGroupsName.CAN_CHANGE_ORDER.value
+    ]) 
 
-    # Assign the new instance to thr group
-    instance.groups.add(perm_group)
+    for perm_group in perm_groups:
+        # Assign the new instance to the group
+        instance.groups.add(perm_group)
 
     
     
