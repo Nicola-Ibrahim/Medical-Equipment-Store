@@ -23,7 +23,9 @@ admin.site.register([
     DeliveryWorkerProfile,
     BaseAccountantProfile,
     DeliveryWorkerAccountantProfile,
-    WarehouseAccountantProfile
+    WarehouseAccountantProfile,
+    AdminProfile,
+    StatisticianProfile
 ])
 
 
