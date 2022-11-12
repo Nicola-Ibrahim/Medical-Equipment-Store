@@ -7,8 +7,8 @@ class Product(models.Model):
     name = models.CharField(max_length=200)
     price = models.FloatField()
     quantity = models.IntegerField()
-    created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     slug = models.SlugField(blank=True, null=True)
     warehouse = models.ForeignKey(Warehouse, related_name='products', on_delete=models.CASCADE)
 
