@@ -14,7 +14,7 @@ class Order(models.Model):
         COMPLETED = 'COMPLETED', 'Completed'
 
     status = models.CharField(max_length=20, default=Status.PROCESSING, choices=Status.choices)
-    price = models.FloatField(null=True, blank=True)
+    price = models.FloatField(default=0)
 
     doctor = models.ForeignKey(Doctor, related_name="doctor_orders", on_delete=models.CASCADE)
     delivery_worker = models.ForeignKey(DeliveryWorker, related_name="delivery_worker_orders", on_delete=models.SET_NULL, null=True)
