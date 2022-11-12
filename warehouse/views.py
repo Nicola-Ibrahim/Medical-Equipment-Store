@@ -9,7 +9,6 @@ from accounts.mixins import PermissionMixin
 from doctor.models import Order
 
 
-
 # Create your views here.
 class ProductsListView(
     PermissionMixin,
