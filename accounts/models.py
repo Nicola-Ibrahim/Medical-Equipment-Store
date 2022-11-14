@@ -4,9 +4,6 @@ from django.db import models
 
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-from django.contrib.auth.models import Group
-
-from .permissions import PermissionGroupsName
 from .models_manager import *
 
 # Create your models here.
@@ -101,7 +98,6 @@ class Warehouse(User):
 
     def save(self, *args, **kwargs) -> None:
         self.type = User.Type.WAREHOUSE
-        # Assign the use to specific group permission
         return super().save(*args, **kwargs)
 
 
