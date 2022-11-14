@@ -38,6 +38,7 @@ class ProductRetrieveView(
 
 
 class WarehouseOrdersListView(
+    PermissionMixin,
     WarehouseOrdersQuerySetMixin,
     ListAPIView):
 
@@ -49,9 +50,12 @@ class WarehouseOrdersListView(
     """
     serializer_class = WarehouseOrdersSerializer
 
+    
+
 
 class WarehouseOrdersUpdateView(
     PermissionMixin,
+    WarehouseOrdersQuerySetMixin,
     RetrieveUpdateDestroyAPIView):
 
     """
@@ -60,7 +64,6 @@ class WarehouseOrdersUpdateView(
     Make inner join between OrderProduct table 
     and Product table where warehouse == current user
     """
-    queryset = Order.objects.all()
     serializer_class = WarehouseOrdersSerializer
 
 
