@@ -1,5 +1,4 @@
 from rest_framework import permissions
-from django.db import models
 import enum
 
 class PermissionGroupsName(enum.Enum):
