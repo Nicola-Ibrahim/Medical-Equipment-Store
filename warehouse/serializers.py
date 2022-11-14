@@ -1,12 +1,13 @@
 from .models import Product
-from doctor.models import Order
+from doctor.models import Order, OrderProduct
+from doctor.serializers import OrderProductsSerializer
 
 from rest_framework import serializers
 
 class ProductSerializer(serializers.ModelSerializer):
 
     url = serializers.HyperlinkedIdentityField(
-        view_name='product-detail',
+        view_name='warehouse:product-details',
         lookup_field = 'slug',
         read_only=True,
     )
@@ -23,31 +24,32 @@ class ProductSerializer(serializers.ModelSerializer):
             'price',
             'quantity',
             'slug',
-            'created',
-            'updated',
+            'created_at',
+            'updated_at',
             'warehouse'
         ]
-        read_only_fields = ['url', 'slug', 'created', 'updated']
+        read_only_fields = ['url', 'slug', 'created_at', 'updated_at']
         write_only_fields = ['id','warehouse']
 
 
     def to_internal_value(self, data):
         """Change data attributes value"""
         
-        data._mutable = True  # make data to be immutable
-
+        # data._mutable = True  # make data to be immutable
+        print(data)
+        
         # Connect the warehouse to current user
-        data['warehouse'] = str(self.context['request'].user.id)
-
-        data._mutable = False  # make data to be mutable
+        data['warehouse'] = self.context['request'].user.id
+        
+        # data._mutable = False  # make data to be mutable
         return super().to_internal_value(data)
 
-
+    
 
 class WarehouseOrdersSerializer(serializers.ModelSerializer):
     """
     This serializer only used to update order flags:
-    [accepted, submitted, delivered]
+    [accepted, submitted, delivered, rejected]
 
     """
 
@@ -56,6 +58,8 @@ class WarehouseOrdersSerializer(serializers.ModelSerializer):
         lookup_field='pk',
         read_only=True
     )
+
+    items = serializers.SerializerMethodField()
 
     class Meta:
         model = Order
@@ -67,9 +71,14 @@ class WarehouseOrdersSerializer(serializers.ModelSerializer):
             'accepted',
             'submitted',
             'delivered',
+            'rejected',
             'items',
-            # 'related_customer_orders', 
             
         ]
         read_only_fields = ['price', 'status']
-        write_only_fields = ['accepted', 'submitted', 'delivered']  
+
+    def get_items(self, obj):
+        """Custom Method-field to display related items in a specific shape"""
+        # Retrieve the sold items that relate to order 
+        qs = OrderProduct.objects.filter(order=obj)
+        return OrderProductsSerializer(qs, many=True, context=self.context).data
