@@ -1,3 +1,4 @@
+from django.db.models import Sum
 from accounts.models import User
 from .models import Product
 from doctor.models import Order
@@ -56,4 +57,35 @@ class WarehouseOrdersQuerySetMixin:
             qs = Order.objects.filter(id__in=order_ids)
             print(qs)
         
+        return qs
+
+
+class ProductsSoldQuerySetMixin():
+    def get_queryset(self, *args, **kwargs):
+        """
+        Display the number of products sold for the warehouse
+        """
+        qs = Product.objects.none()
+
+
+        if(self.request.user.type == User.Type.ADMIN):
+            lookup_values = ['name', 'warehouse']
+            qs = Product.objects.values(*lookup_values) \
+                    .annotate(sold_count=Sum('product_set__quantity')).order_by()
+
+                    
+        if(self.request.user.type == User.Type.WAREHOUSE):
+            lookup_filter = dict()
+            lookup_filter['warehouse'] = self.request.user
+            lookup_filter['product_set__isnull'] = False
+
+            lookup_values = ['name', 'warehouse']
+
+
+            # Create INNER JOIN between Product model and OrderProduct
+            # model and aggregate with Sum()
+            qs = Product.objects.filter(**lookup_filter).values(*lookup_values) \
+                    .annotate(sold_count=Sum('product_set__quantity')).order_by()
+        print(qs)
+
         return qs

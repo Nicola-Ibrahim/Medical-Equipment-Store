@@ -1,19 +1,20 @@
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, ListAPIView, UpdateAPIView
 
 from .models import Product 
-from .serializers import ProductSerializer, WarehouseOrdersSerializer
-from .mixins import ProductQuerySetMixin, WarehouseOrdersQuerySetMixin
+from .serializers import ProductSerializer, WarehouseOrdersSerializer, ProductsSoldSerializer
+from .mixins import ProductQuerySetMixin, WarehouseOrdersQuerySetMixin, ProductsSoldQuerySetMixin
 
 
 from accounts.mixins import PermissionMixin
-from doctor.models import Order
+
 
 
 # Create your views here.
 class ProductsListView(
     PermissionMixin,
     ProductQuerySetMixin,
-    ListCreateAPIView):
+    ListCreateAPIView
+    ):
 
     """
     Display all related products to specific warehouse
@@ -56,7 +57,8 @@ class WarehouseOrdersListView(
 class WarehouseOrdersUpdateView(
     PermissionMixin,
     WarehouseOrdersQuerySetMixin,
-    RetrieveUpdateDestroyAPIView):
+    UpdateAPIView
+    ):
 
     """
     Obtain all related orders
@@ -67,3 +69,9 @@ class WarehouseOrdersUpdateView(
     serializer_class = WarehouseOrdersSerializer
 
 
+
+class ProductsSoldListView(
+    ProductsSoldQuerySetMixin,
+    ListAPIView
+    ):
+    serializer_class = ProductsSoldSerializer

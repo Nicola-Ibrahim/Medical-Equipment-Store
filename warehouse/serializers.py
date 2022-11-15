@@ -1,6 +1,7 @@
 from .models import Product
 from doctor.models import Order, OrderProduct
 from doctor.serializers import OrderProductsSerializer
+from accounts.models import Warehouse
 
 from rest_framework import serializers
 
@@ -82,3 +83,16 @@ class WarehouseOrdersSerializer(serializers.ModelSerializer):
         # Retrieve the sold items that relate to order 
         qs = OrderProduct.objects.filter(order=obj)
         return OrderProductsSerializer(qs, many=True, context=self.context).data
+
+
+
+class ProductsSoldSerializer(serializers.Serializer):
+    name = serializers.CharField(read_only=True)
+    sold_count = serializers.IntegerField(read_only=True)
+
+    warehouse_name = serializers.SerializerMethodField()
+    
+    def get_warehouse_name(self, obj):
+        qs = Warehouse.objects.get(id=obj['warehouse'])
+        name = qs.warehouse_profile.name
+        return name
