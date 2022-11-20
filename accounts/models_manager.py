@@ -1,16 +1,10 @@
 from django.contrib.auth.models import BaseUserManager
 from django.core.validators import validate_email
 
-
 class UserManager(BaseUserManager):
     """
     Creates and saves a User with the given email and password.
     """
-
-    def __init__(self, user_type):
-        self.user_type = user_type
-        super().__init__()
-
     def _create_user(self, email, password, **extra_fields):
         """Create and save a User with the given email and password."""
         if not email or len(email) <= 0:
@@ -42,52 +36,65 @@ class UserManager(BaseUserManager):
 
         return self._create_user(email, password, **extra_fields)
 
-
-
-class DoctorManager(UserManager):
+class ProxyUserManger(UserManager):
+    def __init__(self, user_type):
+        self.user_type = user_type
+        super().__init__()
+    
     def get_queryset(self):
         queryset = super().get_queryset()
         return queryset.filter(type=self.user_type)
 
+# class DoctorManager(UserManager):
+#     def __init__(self, user_type):
+#         self.user_type = user_type
+#         super().__init__()
 
-class DeliveryWorkerManager(UserManager):
-    def get_queryset(self):
-        result = super().get_queryset()
-        return result.filter(type=self.user_type)
+#     def get_queryset(self):
+#         queryset = super().get_queryset()
+#         return queryset.filter(type=self.user_type)
 
-
-class WarehouseManager(UserManager):
-
-    def get_queryset(self):
-        result = super().get_queryset()
-        return result.filter(type=self.user_type)
-
-
-class WarehouseAccountantManager(UserManager):
-    def get_queryset(self):
-        result = super().get_queryset()
-        return result.filter(type=self.user_type)
+# class DeliveryWorkerManager(UserManager):
+    
+#     def get_queryset(self):
+#         result = super().get_queryset()
+#         return result.filter(type=self.user_type)
 
 
-class DeliveryWorkerAccountantManager(UserManager):
-    def get_queryset(self):
-        result = super().get_queryset()
-        return result.filter(type=self.user_type)
+# class WarehouseManager(UserManager):
+    
+    
+
+#     def get_queryset(self):
+#         result = super().get_queryset()
+#         return result.filter(type=self.user_type)
 
 
-class BaseAccountantManager(UserManager):
-    def get_queryset(self):
-        result = super().get_queryset()
-        return result.filter(type=self.user_type)
+# class WarehouseAccountantManager(UserManager):
+#     def get_queryset(self):
+#         result = super().get_queryset()
+#         return result.filter(type=self.user_type)
 
 
-class StatisticianManager(UserManager):
-    def get_queryset(self):
-        result = super().get_queryset()
-        return result.filter(type=self.user_type)
+# class DeliveryWorkerAccountantManager(UserManager):
+#     def get_queryset(self):
+#         result = super().get_queryset()
+#         return result.filter(type=self.user_type)
 
 
-class AdminManager(UserManager):
-    def get_queryset(self):
-        result = super().get_queryset()
-        return result.filter(type=self.user_type)
+# class BaseAccountantManager(UserManager):
+#     def get_queryset(self):
+#         result = super().get_queryset()
+#         return result.filter(type=self.user_type)
+
+
+# class StatisticianManager(UserManager):
+#     def get_queryset(self):
+#         result = super().get_queryset()
+#         return result.filter(type='STATISTICIAN')
+
+
+# class AdminManager(UserManager):
+#     def get_queryset(self):
+#         result = super().get_queryset()
+#         return result.filter(type='ADMIN')

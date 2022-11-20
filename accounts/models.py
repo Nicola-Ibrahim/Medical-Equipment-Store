@@ -1,17 +1,15 @@
-from django.db import models
 
-# Create your models here.
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-from .models_manager import *
+from django.core.validators import validate_email
+from .models_manager import UserManager, ProxyUserManger
 
-# Create your models here.
 
 class User(AbstractUser):
 
-    user_type = None
-    objects = UserManager(user_type)
+    objects = UserManager()
 
     class Type(models.TextChoices):
         DOCTOR = 'DOCTOR', 'doctor'
@@ -32,10 +30,8 @@ class User(AbstractUser):
 
 
     email = models.EmailField(('email address'), unique=True, validators=[validate_email])
-    USERNAME_FIELD = 'email'
-
-    # Remove email from required fields
-    REQUIRED_FIELDS = ['password']
+    USERNAME_FIELD = 'email'        # Set email field as a username
+    REQUIRED_FIELDS = ['password']  # Remove email from required fields
 
 
     phone_number = models.IntegerField(null=True, blank=True)
@@ -45,19 +41,26 @@ class User(AbstractUser):
     zipcode = models.IntegerField(null=True, blank=True)
     identification = models.IntegerField(null=True, blank=True)
     type = models.CharField(max_length=50, choices=Type.choices, blank=True, default=Type.ADMIN)
+    is_verified = models.BooleanField(default=False)
     manager = models.ForeignKey("Admin", on_delete=models.SET_NULL, null=True, blank=True)
 
 
     def __str__(self) -> str:
         return self.email
 
+    def tokens(self):
+        refresh = RefreshToken.for_user(self)
+        return {
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+        }
+
 
 class Doctor(User):
     class Meta:
         proxy = True
 
-    user_type = User.Type.DOCTOR
-    objects = DoctorManager(user_type)
+    objects = ProxyUserManger(User.Type.DOCTOR)
 
     def save(self, *args, **kwargs) -> None:
         self.type = User.Type.DOCTOR
@@ -70,9 +73,8 @@ class DeliveryWorker(User):
     class Meta:
         proxy = True
 
-
-    user_type = User.Type.DELIVERY_WORKER
-    objects = DeliveryWorkerManager(user_type)
+        
+    objects = ProxyUserManger(User.Type.DELIVERY_WORKER)
 
     def save(self, *args, **kwargs) -> None:
         self.type = User.Type.DELIVERY_WORKER
@@ -80,20 +82,13 @@ class DeliveryWorker(User):
 
 
 
-class WarehouseManager(UserManager):
-
-    def get_queryset(self):
-        result = super().get_queryset()
-        return result.filter(type=self.user_type)
 
 class Warehouse(User):
 
-    
     class Meta:
         proxy = True
 
-    user_type = User.Type.WAREHOUSE
-    objects = WarehouseManager(user_type)
+    objects = ProxyUserManger(User.Type.WAREHOUSE)
 
 
     def save(self, *args, **kwargs) -> None:
@@ -107,8 +102,8 @@ class WarehouseAccountant(User):
     class Meta:
         proxy = True
 
-    user_type = User.Type.WAREHOUSE_ACCOUNTANT
-    objects = WarehouseAccountantManager(user_type)
+
+    objects = ProxyUserManger(User.Type.WAREHOUSE_ACCOUNTANT)
 
     def save(self, *args, **kwargs) -> None:
         self.type = User.Type.WAREHOUSE_ACCOUNTANT
@@ -122,8 +117,7 @@ class DeliveryWorkerAccountant(User):
     class Meta:
         proxy = True
 
-    user_type = User.Type.DELIVERY_WORKER_ACCOUNTANT
-    objects = DeliveryWorkerAccountantManager(user_type)
+    objects = ProxyUserManger(User.Type.DELIVERY_WORKER_ACCOUNTANT)
 
 
     def save(self, *args, **kwargs) -> None:
@@ -136,8 +130,7 @@ class BaseAccountant(User):
     class Meta:
         proxy = True
 
-    user_type = User.Type.BASE_ACCOUNTANT
-    objects = BaseAccountantManager(user_type)
+    objects = ProxyUserManger(User.Type.BASE_ACCOUNTANT)
 
 
     def save(self, *args, **kwargs) -> None:
@@ -151,8 +144,7 @@ class Statistician(User):
     class Meta:
         proxy = True
 
-    user_type = User.Type.STATISTICIAN
-    objects = StatisticianManager(user_type)
+    objects = ProxyUserManger(User.Type.STATISTICIAN)
 
 
     def save(self, *args, **kwargs) -> None:
@@ -166,11 +158,10 @@ class Admin(User):
     class Meta:
         proxy = True
 
-    user_type = User.Type.ADMIN
-    objects = AdminManager(user_type)
+    objects = ProxyUserManger(User.Type.ADMIN)
 
     def save(self, *args, **kwargs) -> None:
         self.is_staff = True
         self.is_superuser = True
-        self.type = User.Type.ADMIN.value
+        self.type = User.Type.ADMIN
         return super().save(*args, **kwargs)
