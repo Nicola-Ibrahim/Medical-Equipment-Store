@@ -1,6 +1,10 @@
 
 from django.urls import path
-from .views import WarehouseListView, WarehouseRetrieveView
+from .views import (
+    UserDetailsView,
+    UserSignUpView,
+    UserLoginView,
+)
 
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -11,10 +15,13 @@ from rest_framework_simplejwt.views import (
 app_name = 'accounts'
 
 urlpatterns = [
-    path("warehouses_list/", WarehouseListView.as_view(), name="warehouses-list"),
-    path("warehouse_detail/<int:pk>/", WarehouseRetrieveView.as_view(), name="warehouse-details"),
+    # path("warehouses_list/", WarehouseListView.as_view(), name="warehouses-list"),
+    # path("warehouse_details/<int:pk>/", WarehouseRetrieveView.as_view(), name="warehouse-details"),
 
+    path("get_details/", UserDetailsView.as_view(), name='get-details'),
+    path('signup/',UserSignUpView.as_view()),
+    path('login/', UserLoginView.as_view()),
 
-    path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    # path('login/', TokenObtainPairView.as_view(), name='token-obtain-pair'),
+    # path('login/refresh/', TokenRefreshView.as_view(), name='token-refresh'),
 ]
