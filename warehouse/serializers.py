@@ -24,6 +24,7 @@ class ProductSerializer(serializers.ModelSerializer):
             'name', 
             'price',
             'quantity',
+            'visible',
             'slug',
             'created_at',
             'updated_at',
@@ -36,15 +37,14 @@ class ProductSerializer(serializers.ModelSerializer):
     def to_internal_value(self, data):
         """Change data attributes value"""
         
-        # data._mutable = True  # make data to be immutable
+        data._mutable = True  # make data to be immutable
         print(data)
         
         # Connect the warehouse to current user
         data['warehouse'] = self.context['request'].user.id
         
-        # data._mutable = False  # make data to be mutable
+        data._mutable = False  # make data to be mutable
         return super().to_internal_value(data)
-
     
 
 class WarehouseOrdersSerializer(serializers.ModelSerializer):

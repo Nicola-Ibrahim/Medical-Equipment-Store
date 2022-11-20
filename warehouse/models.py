@@ -4,12 +4,15 @@ from accounts.models import Warehouse
 
 # Create your models here.
 class Product(models.Model):
+    # TODO: Make a composite foreign key from (id, name, warehouse)
+    
     name = models.CharField(max_length=200)
     price = models.FloatField()
     quantity = models.IntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     slug = models.SlugField(blank=True, null=True)
+    visible = models.BooleanField(default=True)
     warehouse = models.ForeignKey(Warehouse, related_name='products', on_delete=models.CASCADE)
 
 
