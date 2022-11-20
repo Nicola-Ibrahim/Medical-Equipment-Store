@@ -9,7 +9,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.contrib.auth.models import Group
 
-from .models import Warehouse
+from .models import Warehouse, Doctor
 from .permissions import PermissionGroupsName
 
 
@@ -18,14 +18,20 @@ def assign_group(sender, instance, **kwargs):
     """Assign permission group to the user"""
 
     # Get the warehouse permission groups
-    perm_groups = Group.objects.filter(name__in = [
-        PermissionGroupsName.WAREHOUSE_GROUP.value,
-        PermissionGroupsName.CAN_CHANGE_ORDER.value
-    ]) 
+    perm_group = Group.objects.get(name=PermissionGroupsName.WAREHOUSE_GROUP.value) 
 
-    for perm_group in perm_groups:
-        # Assign the new instance to the group
-        instance.groups.add(perm_group)
+    # Assign the new instance to the group
+    perm_group.user_set.add(instance)
+
+@receiver(post_save, sender=Doctor)
+def assign_group(sender, instance, **kwargs):
+    """Assign permission group to the user"""
+
+    # Get the warehouse permission groups
+    perm_group = Group.objects.get(name=PermissionGroupsName.DOCTOR_GROUP.value) 
+
+    # Assign the new instance to the group
+    perm_group.user_set.add(instance)
 
     
     
