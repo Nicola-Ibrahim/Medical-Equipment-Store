@@ -3,8 +3,7 @@ import enum
 
 class PermissionGroupsName(enum.Enum):
     WAREHOUSE_GROUP = "Warehouse_group"
-    CAN_CHANGE_ORDER = "Can_change_order"
-
+    DOCTOR_GROUP = "doctors_group"
 
 class CustomDjangoModelPermission(permissions.DjangoModelPermissions):
     perms_map = {
