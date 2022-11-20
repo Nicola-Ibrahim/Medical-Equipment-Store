@@ -11,16 +11,18 @@ class ProductQuerySetMixin:
         Display all products if the user is admin
         """
 
-        qs = Product.objects.none()
+        qs = super().get_queryset(*args, **kwargs)
 
-        if(self.request.user.type == User.Type.ADMIN):
-            qs = super().get_queryset(*args, **kwargs)
+        if(self.request.user.type not in [User.Type.ADMIN, User.Type.WAREHOUSE]):
+            lookup_filter = dict()
+            lookup_filter['visible'] = True
+            qs = qs.filter(**lookup_filter)
 
         if(self.request.user.type == User.Type.WAREHOUSE):
             lookup_filter = dict()
             lookup_filter['warehouse'] = self.request.user
             qs = qs.filter(**lookup_filter)
-            
+
         return qs
     
 
@@ -86,6 +88,5 @@ class ProductsSoldQuerySetMixin():
             # model and aggregate with Sum()
             qs = Product.objects.filter(**lookup_filter).values(*lookup_values) \
                     .annotate(sold_count=Sum('product_set__quantity')).order_by()
-        print(qs)
 
         return qs
