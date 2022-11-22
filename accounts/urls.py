@@ -4,6 +4,7 @@ from .views import (
     UserDetailsView,
     UserSignUpView,
     UserLoginView,
+    VerifyEmail,
 )
 
 from rest_framework_simplejwt.views import (
@@ -21,7 +22,7 @@ urlpatterns = [
     path("get_details/", UserDetailsView.as_view(), name='get-details'),
     path('signup/',UserSignUpView.as_view()),
     path('login/', UserLoginView.as_view()),
+    
+    path("verify_email/", VerifyEmail.as_view(), name='email-verify'),
 
-    # path('login/', TokenObtainPairView.as_view(), name='token-obtain-pair'),
-    # path('login/refresh/', TokenRefreshView.as_view(), name='token-refresh'),
 ]
