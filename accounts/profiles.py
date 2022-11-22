@@ -54,6 +54,7 @@ class DeliveryWorkerProfile(models.Model):
     distance = models.FloatField(max_length=200)
     duration = models.FloatField()
     profit_percentage = models.FloatField()
+    is_idle = models.BooleanField(default=False)
 
     def __str__(self) -> str:
         return self.first_name +' '+ self.last_name
