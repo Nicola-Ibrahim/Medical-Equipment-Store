@@ -6,18 +6,15 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from rest_framework import status
-from rest_framework.reverse import reverse
 
-from rest_framework_simplejwt.tokens import RefreshToken
-from django.contrib.sites.shortcuts import get_current_site
 from django.core.exceptions import ViewDoesNotExist
 
 from home import settings
 import jwt
 
-from .serializers import UserLoginSerializer, WarehouseUserSerializer, DoctorUserSerializer
+from .serializers import UserLoginSerializer, WarehouseUserSerializer, DoctorUserSerializer, DeliveryWorkerUserSerializer
 from .models import User
-
+from .services import send_verification
 
 class UserLoginView(GenericAPIView):
     """
@@ -34,12 +31,12 @@ class UserLoginView(GenericAPIView):
 # verify the mail that send in the mail box
 class VerifyEmail(APIView):
     permission_classes = [AllowAny]
-    # serializer_class = EmailVerificationSerializer
 
     def get(self, request):
         token = request.GET.get('token')
         try:
             payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"], type=jwt)
+            print(payload)
             user = User.objects.get(id=payload['user_id'])
             if not user.is_verified:
                 user.is_verified = True
@@ -62,6 +59,8 @@ class UserSignUpView(GenericAPIView):
         """
         serializers_classes = {
             'warehouse': WarehouseUserSerializer,
+            'doctor': DoctorUserSerializer,
+            'deliver_worker': DeliveryWorkerUserSerializer,
         }
         
         serializers_class = serializers_classes.get(self.request.query_params.get('type'))
@@ -75,21 +74,9 @@ class UserSignUpView(GenericAPIView):
         serializer = self.get_serializer(data=user_data, context={"request":request})
         serializer.is_valid(raise_exception=True)
         serializer.save()
+
         user_data = serializer.data
-        user = User.objects.get(email=user_data['email'])
-        token = RefreshToken.for_user(user).access_token
-        current_site = get_current_site(request).domain
-        print(current_site)
-
-        # relativeLink = reverse('email-verify')
-        # absurl = 'http://'+current_site+relativeLink+"?token="+str(token)
-
-        # email_body = 'Hi '+user.email + \
-        #     ' Use the link below to verify your email \n' + absurl
-        # data = {'email_body': email_body, 'to_email': user.email,
-        #         'email_subject': 'Verify your email'}
-
-        # Utils.send_email(data)
+        send_verification(user_data=user_data, request=request)
         return Response(user_data, status=status.HTTP_201_CREATED)
 
 
@@ -109,7 +96,8 @@ class UserDetailsView(
         """
         serializers_classes = {
             'warehouse': WarehouseUserSerializer,
-            'doctor' : DoctorUserSerializer
+            'doctor' : DoctorUserSerializer,
+            'delivery_worker' : DeliveryWorkerUserSerializer,
         }
 
         # Change the serializer depending on the authenticated user type
