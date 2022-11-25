@@ -1,14 +1,14 @@
 from django.db import models
-from .utils import slugify_instance_name
+from django.core.validators import MinValueValidator
+from core.utils import slugify_instance_name
 from accounts.models import Warehouse
 
 # Create your models here.
 class Product(models.Model):
-    # TODO: Make a composite foreign key from (id, name, warehouse)
     
     name = models.CharField(max_length=200)
-    price = models.FloatField()
-    quantity = models.IntegerField()
+    price = models.FloatField(validators=[MinValueValidator(1)])
+    quantity = models.IntegerField(validators=[MinValueValidator(1)])
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     slug = models.SlugField(blank=True, null=True)
@@ -29,12 +29,10 @@ class Product(models.Model):
         return super().save(*args, **kwargs)
 
 
-
     def is_available(self, consume_quantity:int):
         available_quantity = self.quantity - consume_quantity
 
         # Abort process if the available quantity bellow 0 value
-        print(available_quantity)
         if(available_quantity < 0):
             return False, available_quantity
         return True, available_quantity
