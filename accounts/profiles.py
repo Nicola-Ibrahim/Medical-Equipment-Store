@@ -1,5 +1,5 @@
 from django.db import models
-from accounts.models import *
+from .models import *
 
 
 
@@ -48,7 +48,7 @@ class WarehouseProfile(models.Model):
 
 
 class DeliveryWorkerProfile(models.Model):
-    delivery_worker = models.OneToOneField(DeliveryWorker, related_name='delivery_worker_profile', on_delete=models.CASCADE)
+    delivery_worker = models.OneToOneField(DeliveryWorker, related_name='delivery_worker_profile', on_delete=models.CASCADE, blank=True, null=True)
     first_name = models.CharField(max_length=200)
     last_name = models.CharField(max_length=200)
     distance = models.FloatField(max_length=200)
@@ -61,7 +61,7 @@ class DeliveryWorkerProfile(models.Model):
 
 
 class DoctorProfile(models.Model):
-    doctor = models.OneToOneField(Doctor, related_name='doctor_profile', on_delete=models.CASCADE)
+    doctor = models.OneToOneField(Doctor, related_name='doctor_profile', on_delete=models.CASCADE, blank=True, null=True)
     first_name = models.CharField(max_length=200)
     last_name = models.CharField(max_length=200)
     
