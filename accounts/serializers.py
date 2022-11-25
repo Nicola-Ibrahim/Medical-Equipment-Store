@@ -1,5 +1,6 @@
 from .models import Warehouse, User, Doctor, DeliveryWorker
 from rest_framework import serializers
+from rest_framework import exceptions
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth import authenticate
 from .profile_serializers import (
@@ -83,7 +84,6 @@ class UserSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data:dict):
 
-
         # Get warehouse user profile data
         profile_data = validated_data.pop(self.Meta.profile_related_name)
 
@@ -105,7 +105,9 @@ class UserSerializer(serializers.ModelSerializer):
 
     def get_profile_serializer(self):
         dic = {
-            'warehouse_profile': WarehouseProfileSerializer
+            'warehouse_profile': WarehouseProfileSerializer,
+            'doctor_profile': DoctorProfileSerializer,
+            'delivery_worker_profile': DeliveryWorkerProfileSerializer,
         }
 
         return dic.get(self.Meta.profile_related_name)
@@ -127,7 +129,7 @@ class UserLoginSerializer(serializers.Serializer):
     tokens = serializers.SerializerMethodField()
 
     class Meta:
-        model = Warehouse
+        model = User
         fields = [
             'email',
             'password',
@@ -144,7 +146,6 @@ class UserLoginSerializer(serializers.Serializer):
         }
 
     def validate(self, attrs):
-
         email = attrs.get('email')
         password = attrs.get('password')
 
@@ -152,6 +153,7 @@ class UserLoginSerializer(serializers.Serializer):
         if email and password:
             user = authenticate(request=self.context['request'],
                                 username=email, password=password)
+
             if not user:
                 msg = 'Unable to log in with provided credentials.'
                 raise serializers.ValidationError(msg, code='authorization')
