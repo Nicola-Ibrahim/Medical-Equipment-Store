@@ -17,21 +17,30 @@ from .permissions import PermissionGroupsName
 def assign_group(sender, instance, **kwargs):
     """Assign permission group to the user"""
 
-    # Get the warehouse permission groups
-    perm_group = Group.objects.get(name=PermissionGroupsName.WAREHOUSE_GROUP.value) 
+    try:
+        # Get the warehouse permission groups
+        perm_group = Group.objects.get(name=PermissionGroupsName.WAREHOUSE_GROUP.value) 
 
-    # Assign the new instance to the group
-    perm_group.user_set.add(instance)
+    except Group.DoesNotExist:
+        pass
 
+    else:
+        # Assign the new instance to the group
+        perm_group.user_set.add(instance)
+    
 @receiver(post_save, sender=Doctor)
 def assign_group(sender, instance, **kwargs):
     """Assign permission group to the user"""
 
-    # Get the warehouse permission groups
-    perm_group = Group.objects.get(name=PermissionGroupsName.DOCTOR_GROUP.value) 
+    try:
+        # Get the warehouse permission groups
+        perm_group = Group.objects.get(name=PermissionGroupsName.DOCTOR_GROUP.value) 
 
-    # Assign the new instance to the group
-    perm_group.user_set.add(instance)
+    except Group.DoesNotExist:
+        pass
+    else:
+        # Assign the new instance to the group
+        perm_group.user_set.add(instance)
 
     
     
