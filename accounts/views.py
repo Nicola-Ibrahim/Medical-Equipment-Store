@@ -1,6 +1,5 @@
 from rest_framework.generics import (
-    RetrieveUpdateDestroyAPIView, 
-    GenericAPIView
+    GenericAPIView,
 )
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -12,7 +11,7 @@ from django.core.exceptions import ViewDoesNotExist
 from home import settings
 import jwt
 
-from .serializers import UserLoginSerializer, WarehouseUserSerializer, DoctorUserSerializer, DeliveryWorkerUserSerializer
+from .serializers import UserLoginSerializer, WarehouseUserSerializer, DoctorUserSerializer, DeliveryWorkerUserSerializer, UserSerializer
 from .models import User
 from .services import send_verification
 
@@ -28,19 +27,25 @@ class UserLoginView(GenericAPIView):
         serializer.is_valid(raise_exception=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-# verify the mail that send in the mail box
 class VerifyEmail(APIView):
+    """verify the mail that send in the mail box"""
+
     permission_classes = [AllowAny]
 
     def get(self, request):
         token = request.GET.get('token')
         try:
+            # Decode the token coming with the request
             payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"], type=jwt)
-            print(payload)
+
+            # Get the use id from the payload
             user = User.objects.get(id=payload['user_id'])
+
+            # Check if the user is not verified 
             if not user.is_verified:
                 user.is_verified = True
                 user.save()
+
             return Response({'email': 'Successfully activated'}, status=status.HTTP_200_OK)
 
         except jwt.ExpiredSignatureError as identifier:
@@ -49,8 +54,8 @@ class VerifyEmail(APIView):
             return Response({'error': 'Invalid token'}, status=status.HTTP_400_BAD_REQUEST)
 
 
-class UserSignUpView(GenericAPIView):
-    permission_classes = [AllowAny]
+class UserSignView(APIView):
+    permission_classes = [AllowAny,]
     # renderer_classes = (UserRenderer,)
 
     def get_serializer_class(self):
@@ -60,14 +65,15 @@ class UserSignUpView(GenericAPIView):
         serializers_classes = {
             'warehouse': WarehouseUserSerializer,
             'doctor': DoctorUserSerializer,
-            'deliver_worker': DeliveryWorkerUserSerializer,
+            'delivery_worker': DeliveryWorkerUserSerializer,
         }
         
         serializers_class = serializers_classes.get(self.request.query_params.get('type'))
         if(not serializers_class):
-            raise ViewDoesNotExist('The view is not found')
+            return UserSerializer
 
         return serializers_class
+
 
     def post(self, request):
         user_data = request.data
@@ -82,13 +88,12 @@ class UserSignUpView(GenericAPIView):
 
 class UserDetailsView(
     # PermissionMixin,
-    RetrieveUpdateDestroyAPIView
+    APIView
     ):
     """
     Class based view to Get Warehouse User Details using Token Authentication
     """
     queryset = User.objects.all()
-    # authentication_classes = (SessionAuthentication, TokenAuthentication)
 
     def get_serializer_class(self):
         """
@@ -103,29 +108,14 @@ class UserDetailsView(
         # Change the serializer depending on the authenticated user type
         serializers_class = serializers_classes.get(self.request.user.type.lower())
         if(not serializers_class):
-            raise ViewDoesNotExist('The view is not found')
+            return UserSerializer
 
         return serializers_class
 
     def get(self, request, *args, **kwargs):
-        print(request.user.id)
         user = self.get_queryset().get(id=request.user.id)
         serializer = self.get_serializer(user, context={'request':request})
         return Response(serializer.data)
-
-
-
-# class WarehouseListView(
-#     ListAPIView):
-#     queryset = Warehouse.objects.all()
-#     serializer_class = WarehouseUserSerializer
-
-
-# class WarehouseRetrieveView(
-#     RetrieveUpdateDestroyAPIView):
-
-#     queryset = Warehouse.objects.all()
-#     serializer_class = WarehouseUserSerializer
 
 
 
