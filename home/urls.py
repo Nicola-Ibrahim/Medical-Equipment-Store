@@ -15,14 +15,21 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-
-
+from rest_framework.schemas import get_schema_view
+from rest_framework.documentation import include_docs_urls
 
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("api/warehouse/", include("warehouse.urls"), name='warehouse'),
-    path("api/doctor/", include("doctor.urls"), name='doctor'),
     path("api/accounts/", include("accounts.urls"), name='accounts'),
+    path("api/product/", include("product.urls"), name='product'),
+    path("api/order/", include("order.urls"), name='order'),
+    path("api/notification/", include("notification.urls"), name='notification'),
+    path("docs/", include_docs_urls(title='MedicalStorApi'), name=""),
+    path('api/schema/', get_schema_view(
+        title="MedicalStorApi",
+        description="API for all the medical equipment store",
+        version="1.0.0"
+    ), name='openapi-schema'),
 
 ]

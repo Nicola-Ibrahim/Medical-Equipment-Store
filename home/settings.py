@@ -41,22 +41,25 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "rest_framework",
-    # "rest_framework.authtoken",
-    "rest_framework_simplejwt",
     
     # Created apps
     "accounts",
-    "warehouse",
-    "doctor",
+    "product",
+    "order",
+    "notification",
     
+    "rest_framework",
+    "rest_framework_simplejwt",
 ]
 
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework.authentication.SessionAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ),
+    'DEFAULT_SCHEMA_CLASS': (
+        'rest_framework.schemas.coreapi.AutoSchema'
     )
 }
 
