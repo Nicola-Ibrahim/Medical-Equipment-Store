@@ -2,7 +2,7 @@ from rest_framework import permissions
 import enum
 
 class PermissionGroupsName(enum.Enum):
-    WAREHOUSE_GROUP = "Warehouse_group"
+    WAREHOUSE_GROUP = "warehouses_group"
     DOCTOR_GROUP = "doctors_group"
 
 class CustomDjangoModelPermission(permissions.DjangoModelPermissions):
