@@ -1,5 +1,6 @@
 from rest_framework.generics import (
     GenericAPIView,
+    RetrieveUpdateDestroyAPIView
 )
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -54,7 +55,7 @@ class VerifyEmail(APIView):
             return Response({'error': 'Invalid token'}, status=status.HTTP_400_BAD_REQUEST)
 
 
-class UserSignView(APIView):
+class UserSignView(GenericAPIView):
     permission_classes = [AllowAny,]
     # renderer_classes = (UserRenderer,)
 
@@ -68,25 +69,30 @@ class UserSignView(APIView):
             'delivery_worker': DeliveryWorkerUserSerializer,
         }
         
-        serializers_class = serializers_classes.get(self.request.query_params.get('type'))
-        if(not serializers_class):
-            return UserSerializer
+        serializer_class = serializers_classes.get(self.request.query_params.get('type'))
+        if(not serializer_class):
+            raise ViewDoesNotExist("Please specify a view")
 
-        return serializers_class
+        return serializer_class
+
 
 
     def post(self, request):
+        """Add a new user"""
         user_data = request.data
         serializer = self.get_serializer(data=user_data, context={"request":request})
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
         user_data = serializer.data
+
+        # Send verification message to user's email
         send_verification(user_data=user_data, request=request)
+        
         return Response(user_data, status=status.HTTP_201_CREATED)
 
 
-class UserDetailsView(APIView):
+class UserDetailsView(RetrieveUpdateDestroyAPIView):
     """
     Class based view to Get Warehouse User Details using Token Authentication
     """
@@ -103,11 +109,11 @@ class UserDetailsView(APIView):
         }
 
         # Change the serializer depending on the authenticated user type
-        serializers_class = serializers_classes.get(self.request.user.type.lower())
-        if(not serializers_class):
+        serializer_class = serializers_classes.get(self.request.user.type.lower())
+        if(not serializer_class):
             return UserSerializer
 
-        return serializers_class
+        return serializer_class
 
     def get(self, request, *args, **kwargs):
         user = self.get_queryset().get(id=request.user.id)
