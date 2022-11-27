@@ -27,7 +27,7 @@ class Order(models.Model):
     shipped_date = models.DateTimeField(auto_now_add=True)
 
     # Items
-    items = models.ManyToManyField(Product, through='OrderProduct', related_name='orders')
+    products = models.ManyToManyField(Product, through='OrderProduct')
 
     def __str__(self) -> str:
         return f"order-{self.id} by -> " + str(self.doctor)
@@ -36,14 +36,17 @@ class OrderProduct(models.Model):
     order = models.ForeignKey(Order, related_name='order_set', on_delete=models.CASCADE)
     product = models.ForeignKey(Product, related_name='product_set', on_delete=models.SET_NULL, null=True)
     quantity = models.IntegerField(default=1)
-    discount = models.FloatField(default=0)
     price = models.FloatField(null=True, blank=True)
     
 
     def _calc_price(self):
+        """
+        The method calculates the price value for each 
+        product multiply with the inserting quantity
+        """
         price_value = self.quantity * self.product.price
-        if(self.discount > 0):
-            price_value *=  self.discount / 100
+        if(self.product.discount > 0):
+            price_value *=  self.product.discount / 100
         return price_value
 
 
