@@ -9,6 +9,7 @@ class Product(models.Model):
     name = models.CharField(max_length=200)
     price = models.FloatField(validators=[MinValueValidator(1)])
     quantity = models.IntegerField(validators=[MinValueValidator(1)])
+    discount = models.FloatField(default=0, validators=[MinValueValidator(0)])
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     slug = models.SlugField(blank=True, null=True)
@@ -30,6 +31,8 @@ class Product(models.Model):
 
 
     def is_available(self, consume_quantity:int):
+        """Check availability of a product"""
+        
         available_quantity = self.quantity - consume_quantity
 
         # Abort process if the available quantity bellow 0 value

@@ -22,6 +22,7 @@ class ProductSerializer(serializers.ModelSerializer):
             'url', 
             'name', 
             'price',
+            'discount',
             'quantity',
             'visible',
             'slug',
