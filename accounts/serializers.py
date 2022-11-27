@@ -19,7 +19,7 @@ class UserSerializer(serializers.ModelSerializer):
     groups = serializers.ReadOnlyField(source="groups.all.values")
 
     password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
-    password2 = serializers.CharField(write_only=True, required=True)
+    confirm_password = serializers.CharField(write_only=True, required=True)
 
 
     # Reverse relation
@@ -33,7 +33,7 @@ class UserSerializer(serializers.ModelSerializer):
             'id',
             'email',
             'password',
-            'password2',
+            'confirm_password',
             'phone_number',
             'state',
             'city',
@@ -54,11 +54,11 @@ class UserSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'manager': {'write_only': True},
             'password': {'write_only': True},
-            'password2': {'write_only': True}
+            'confirm_password': {'write_only': True}
         }
 
     def validate(self, attrs):
-        if(attrs['password'] != attrs['password2']):
+        if(attrs['password'] != attrs['confirm_password']):
             raise serializers.ValidationError({"password": "Password fields didn't match."})
         return attrs
 
@@ -87,8 +87,8 @@ class UserSerializer(serializers.ModelSerializer):
         # Get warehouse user profile data
         profile_data = validated_data.pop(self.Meta.profile_related_name)
 
-        # Remove password2 field value from inserting data
-        validated_data.pop('password2')
+        # Remove confirm_password field value from inserting data
+        validated_data.pop('confirm_password')
 
         # Create a new warehouse user
         instance = super().create(validated_data)
