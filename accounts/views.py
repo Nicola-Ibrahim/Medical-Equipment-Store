@@ -86,10 +86,7 @@ class UserSignView(APIView):
         return Response(user_data, status=status.HTTP_201_CREATED)
 
 
-class UserDetailsView(
-    # PermissionMixin,
-    APIView
-    ):
+class UserDetailsView(APIView):
     """
     Class based view to Get Warehouse User Details using Token Authentication
     """
