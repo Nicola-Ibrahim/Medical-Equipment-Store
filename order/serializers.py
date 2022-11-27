@@ -2,6 +2,8 @@
 from rest_framework import serializers
 from .models import Order, OrderProduct
 from product.models import Product
+from core.utils import send_msg
+from accounts.models import User
 
 class OrdersInlineSerializer(serializers.Serializer):
     """
@@ -22,7 +24,6 @@ class OrderProductsSerializer(serializers.ModelSerializer):
             'product_name',
             'warehouse_name',
             'quantity',
-            'discount',
             'price',
             'order',
             'product',
@@ -53,76 +54,90 @@ class OrderSerializer(serializers.ModelSerializer):
 
     # Add extra read_only field
     url = serializers.HyperlinkedIdentityField(
-        view_name='doctor:order-details',
+        view_name='order:order-details',
         lookup_field='pk',
         read_only=True
     )
-
+    order_id = serializers.ReadOnlyField(source='id')
     doctor_name = serializers.ReadOnlyField(source='doctor.doctor_profile.first_name')
 
     
     # M2M relation field
-    items = serializers.SerializerMethodField()
+    # products = serializers.SerializerMethodField()
+    products = OrderProductsSerializer(source='order_set.all', many=True)
 
     class Meta:
         model = Order
         fields = [
-            'id', 
+            'id',
+            'order_id', 
             'url', 
             'doctor_name',
             'price',
             'status',
-            'accepted',
-            'submitted',
-            'delivered',
-            'items',
             'doctor',
+            'products',
             
         ]
 
-        read_only_fields = ['id', 'status', 'price', 'accepted', 'submitted', 'delivered']
+        read_only_fields = ['id', 'price']
         extra_kwargs = {
-            'doctor': {'write_only': True},
+            'order': {'write_only': True},
         }
     
-    def get_items(self, obj):
-        """Custom Method-field to display order related items"""
-        qs = OrderProduct.objects.filter(order=obj)
+    def get_products(self, obj):
+        """Custom Method-field to display order related products"""
+
+        # Get products related to order
+        qs = obj.order_set.all()
         return OrderProductsSerializer(qs, many=True, context=self.context).data
 
+
+    def check_product_availability(self, products):
+        """Check available products"""
+
+        for product_details in products:
+            product = Product.objects.get(name=product_details['name'])
+
+            availability, available_quantity = product.is_available(consume_quantity=product_details['quantity'])
+            if(not availability):
+                raise serializers.ValidationError(f"You exceed the number of available for the {product.name}:{product.quantity}")
+
+        return True
+
     def to_internal_value(self, data):
+        data = data.copy()
         data['doctor'] = self.context['request'].user
         return data
 
+
     def create(self, validated_data):
-        items: list = validated_data.pop('items')
-
-        # TODO: Apply item availability before inserting 
-
-        # Check available items
-        for item_details in items:
-            item = Product.objects.get(name=item_details['name'])
-
-            availability, available_quantity = item.is_available(consume_quantity=item_details['quantity'])
-            if(not availability):
-                raise serializers.ValidationError(f"You exceed the number of available for the {item.name}:{item.quantity}")
+        products_data: list = validated_data.pop('products')
 
 
-        
-        # Create a new order
+        self.check_product_availability(products_data)
         instance = super().create(validated_data)
 
-        # add
-        self.context['order'] = instance.id
         
-        # Link order with inserted items
-        ser = OrderProductsSerializer(data=items, many=True, context=self.context)
+        # Link order with inserted products
+        self.context['order'] = instance.id
+        ser = OrderProductsSerializer(data=products_data, many=True, context=self.context)
         ser.is_valid(raise_exception=True)
         ser.save()
 
 
         return instance
-
-
     
+    def update(self, instance, validated_data):
+        user = self.context['request'].user
+        
+        if(user.type not in (User.Type.ADMIN, User.Type.DOCTOR)):
+            # Allow change only the order status
+            status = validated_data.get('status')
+            validated_data = {'status': status}
+            send_msg(status)
+
+        return super().update(instance, validated_data)
+
+
 
