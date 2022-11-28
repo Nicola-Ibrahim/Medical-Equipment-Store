@@ -1,6 +1,7 @@
 from rest_framework.generics import (
     GenericAPIView,
-    RetrieveUpdateDestroyAPIView
+    RetrieveUpdateDestroyAPIView,
+    ListAPIView
 )
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -8,13 +9,16 @@ from rest_framework.permissions import AllowAny
 from rest_framework import status
 
 from django.core.exceptions import ViewDoesNotExist
-
-from home import settings
+from django_filters.rest_framework import DjangoFilterBackend
 import jwt
 
+
 from .serializers import UserLoginSerializer, WarehouseUserSerializer, DoctorUserSerializer, DeliveryWorkerUserSerializer, UserSerializer
-from .models import User
-from .services import send_verification
+from .models import User, Warehouse
+from .filters import WarehousesFilter
+from home import settings
+from core.services import send_verification
+
 
 class UserLoginView(GenericAPIView):
     """
@@ -68,6 +72,7 @@ class UserSignView(GenericAPIView):
             'doctor': DoctorUserSerializer,
             'delivery_worker': DeliveryWorkerUserSerializer,
         }
+
         
         serializer_class = serializers_classes.get(self.request.query_params.get('type'))
         if(not serializer_class):
@@ -122,3 +127,8 @@ class UserDetailsView(RetrieveUpdateDestroyAPIView):
 
 
 
+class WarehousesListView(ListAPIView):
+    queryset = Warehouse.objects.all()
+    serializer_class = WarehouseUserSerializer
+    filterset_class = WarehousesFilter
+    filter_backends = [DjangoFilterBackend]
