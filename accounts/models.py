@@ -1,3 +1,9 @@
+"""
+This file contains only user models
+Also, proxy models added fot more customization on 
+users to get subgroup of users 
+"""
+
 
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -12,14 +18,14 @@ class User(AbstractUser):
     objects = UserManager()
 
     class Type(models.TextChoices):
-        DOCTOR = 'DOCTOR', 'doctor'
-        DELIVERY_WORKER = 'DELIVERY WORKER', 'delivery worker'
-        WAREHOUSE = 'WAREHOUSE' , 'warehouse'
-        ADMIN = 'ADMIN', 'admin'
-        STATISTICIAN = 'STATISTICIAN', 'statistician'
-        BASE_ACCOUNTANT = 'BASE ACCOUNTANT', 'base accountant'
-        DELIVERY_WORKER_ACCOUNTANT = 'DELIVERY WORKER ACCOUNTANT', 'delivery worker accountant'
-        WAREHOUSE_ACCOUNTANT = 'WAREHOUSE ACCOUNTANT', 'warehouse accountant'
+        DOCTOR = 'Doctor', 'doctor'
+        DELIVERY_WORKER = 'Delivery worker', 'delivery worker'
+        WAREHOUSE = 'Warehouse' , 'warehouse'
+        ADMIN = 'Admin', 'admin'
+        STATISTICIAN = 'Statistician', 'statistician'
+        BASE_ACCOUNTANT = 'Base accountant', 'base accountant'
+        DELIVERY_WORKER_ACCOUNTANT = 'Delivery worker accountant', 'delivery worker accountant'
+        WAREHOUSE_ACCOUNTANT = 'Warehouse accountant', 'warehouse accountant'
 
     
 
@@ -97,6 +103,7 @@ class Warehouse(User):
 
 
 
+
 class WarehouseAccountant(User):
 
     class Meta:
@@ -165,3 +172,6 @@ class Admin(User):
         self.is_superuser = True
         self.type = User.Type.ADMIN
         return super().save(*args, **kwargs)
+
+
+
