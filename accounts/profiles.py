@@ -37,14 +37,21 @@ class WarehouseAccountantProfile(models.Model):
 class WarehouseProfile(models.Model):
     warehouse = models.OneToOneField(Warehouse, related_name='warehouse_profile', on_delete=models.CASCADE, blank=True, null=True)
     name = models.CharField(max_length=200)
-    service = models.CharField(max_length=200)
     working_hours = models.FloatField()
-    sections = models.IntegerField()
     profit_percentage = models.FloatField()
 
     def __str__(self) -> str:
         return self.name
 
+
+
+class Section(models.Model):
+    name = models.CharField(max_length=200)
+    warehouse = models.ManyToManyField(WarehouseProfile, related_name='sections')
+
+class Service(models.Model):
+    name = models.CharField(max_length=200)
+    Warehouse = models.ManyToManyField(WarehouseProfile, related_name='services')
 
 
 class DeliveryWorkerProfile(models.Model):
@@ -85,3 +92,5 @@ class StatisticianProfile(models.Model):
     
     def __str__(self) -> str:
         return self.first_name +' '+ self.last_name
+
+
