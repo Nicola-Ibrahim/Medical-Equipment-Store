@@ -24,3 +24,8 @@ def slugify_instance_name(instance, new_slug=None):
     instance.slug = slug
 
     return instance
+
+
+def send_msg(value):
+    msg = f"Your order has been {value}"
+    print(msg)
