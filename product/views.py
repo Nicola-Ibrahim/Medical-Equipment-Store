@@ -1,11 +1,13 @@
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, ListAPIView, UpdateAPIView
+from rest_framework.filters import OrderingFilter
 
+from django_filters.rest_framework import DjangoFilterBackend
 from .models import Product 
 from .serializers import ProductSerializer, ProductsSoldSerializer
 from .mixins import ProductQuerySetMixin, ProductsSoldQuerySetMixin
-
-
+from .filters import ProductFilter
 from accounts.mixins import PermissionMixin
+
 
 
 
@@ -23,6 +25,10 @@ class ProductsListView(
 
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+    filter_backends = [DjangoFilterBackend, OrderingFilter]
+    filterset_class = ProductFilter
+    ordering_fields = ['name', 'price']
+
 
 
 class ProductDetailsView(
