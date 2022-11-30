@@ -22,6 +22,7 @@ class ProductSerializer(serializers.ModelSerializer):
             'url', 
             'name', 
             'price',
+            'image',
             'discount',
             'quantity',
             'visible',
@@ -35,11 +36,17 @@ class ProductSerializer(serializers.ModelSerializer):
 
     def to_internal_value(self, data):
         """Change data attributes value"""
+        
 
         # Assign warehouse field to current user
         data['warehouse'] = self.context['request'].user.id
         
         return super().to_internal_value(data)
+
+
+    def create(self, validated_data):
+        print(validated_data)
+        return super().create(validated_data)
 
 
 class ProductsSoldSerializer(serializers.Serializer):

@@ -1,5 +1,7 @@
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, ListAPIView, UpdateAPIView
 from rest_framework.filters import OrderingFilter
+from rest_framework.views import APIView
+from rest_framework.parsers import MultiPartParser, FormParser
 
 from django_filters.rest_framework import DjangoFilterBackend
 from .models import Product 
@@ -13,8 +15,8 @@ from accounts.mixins import PermissionMixin
 
 # Create your views here.
 class ProductsListView(
-    PermissionMixin,
-    ProductQuerySetMixin,
+    # PermissionMixin,
+    # ProductQuerySetMixin,
     ListCreateAPIView
     ):
 
@@ -25,6 +27,8 @@ class ProductsListView(
 
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+    parser_classes = [MultiPartParser, FormParser] # Send image-date and form-data
+
     filter_backends = [DjangoFilterBackend, OrderingFilter]
     filterset_class = ProductFilter
     ordering_fields = ['name', 'price']
@@ -49,3 +53,5 @@ class ProductsSoldListView(
     ListAPIView
     ):
     serializer_class = ProductsSoldSerializer
+
+

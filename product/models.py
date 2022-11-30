@@ -3,6 +3,13 @@ from django.core.validators import MinValueValidator
 from core.utils import slugify_instance_name
 from accounts.models import Warehouse
 
+def upload_to(instance, filename):
+    print(instance, filename)
+
+    filename, extension = filename.split('.')
+
+    return f"products/{instance.id}/{filename}-{instance.id}.{extension}"
+
 # Create your models here.
 class Product(models.Model):
     
@@ -10,6 +17,7 @@ class Product(models.Model):
     price = models.FloatField(validators=[MinValueValidator(1)])
     quantity = models.IntegerField(validators=[MinValueValidator(1)])
     discount = models.FloatField(default=0, validators=[MinValueValidator(0)])
+    image = models.ImageField(upload_to=upload_to, height_field=None, width_field=None, max_length=None, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     slug = models.SlugField(blank=True, null=True)
