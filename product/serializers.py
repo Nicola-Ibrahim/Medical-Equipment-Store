@@ -12,8 +12,7 @@ class ProductSerializer(serializers.ModelSerializer):
         read_only=True,
     )
 
-    # Reverse M2M relation
-    # orders = OrderSerializer(many=True, read_only=True)
+    warehouse_name = serializers.ReadOnlyField(source='warehouse.warehouse_profile.name')
 
     class Meta:
         model = Product
@@ -29,24 +28,24 @@ class ProductSerializer(serializers.ModelSerializer):
             'slug',
             'created_at',
             'updated_at',
-            'warehouse'
+            'warehouse_name',
+            'warehouse',
         ]
         read_only_fields = ['url', 'slug', 'created_at', 'updated_at']
+        extra_kwargs = {
+            'warehouse': {'write_only': True},
+        }
 
 
-    def to_internal_value(self, data):
-        """Change data attributes value"""
+    # def to_internal_value(self, data):
+    #     """Change data attributes value"""
         
 
-        # Assign warehouse field to current user
-        data['warehouse'] = self.context['request'].user.id
+    #     # Assign warehouse field to current user
+    #     data['warehouse'] = self.context['request'].user.id
         
-        return super().to_internal_value(data)
+    #     return super().to_internal_value(data)
 
-
-    def create(self, validated_data):
-        print(validated_data)
-        return super().create(validated_data)
 
 
 class ProductsSoldSerializer(serializers.Serializer):

@@ -15,8 +15,8 @@ from accounts.mixins import PermissionMixin
 
 # Create your views here.
 class ProductsListView(
-    # PermissionMixin,
-    # ProductQuerySetMixin,
+    PermissionMixin,
+    ProductQuerySetMixin,
     ListCreateAPIView
     ):
 
@@ -33,6 +33,10 @@ class ProductsListView(
     filterset_class = ProductFilter
     ordering_fields = ['name', 'price']
 
+
+    def perform_create(self, serializer):
+        serializer.save(warehouse=self.context['request'].user)
+        return super().perform_create(serializer)
 
 
 class ProductDetailsView(
