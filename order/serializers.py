@@ -84,7 +84,12 @@ class OrderSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'order': {'write_only': True},
         }
-    
+
+    def validate_products(self, instances):
+        if len(instances) < 1:
+            raise serializers.ValidationError("Order should have at least 1 item")
+        return instances
+
     def get_products(self, obj):
         """Custom Method-field to display order related products"""
 
