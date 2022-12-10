@@ -49,10 +49,15 @@ class Section(models.Model):
     name = models.CharField(max_length=200)
     warehouse = models.ManyToManyField(WarehouseProfile, related_name='sections')
 
+    def __str__(self) -> str:
+        return self.name
+
 class Service(models.Model):
     name = models.CharField(max_length=200)
     Warehouse = models.ManyToManyField(WarehouseProfile, related_name='services')
 
+    def __str__(self) -> str:
+        return self.name
 
 class DeliveryWorkerProfile(models.Model):
     delivery_worker = models.OneToOneField(DeliveryWorker, related_name='delivery_worker_profile', on_delete=models.CASCADE, blank=True, null=True)
