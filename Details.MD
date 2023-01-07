@@ -70,6 +70,14 @@
 
     Functionalities:
         - Create account
+        - Product: Add, Edit, Remove
+        - Indicate work days
+        - Upcoming order: Accepted, Submitted, Delivered, Rejected
+        - Obtain number of products sold
+        - Profit percentage value
+        - Indicate the visibility of a product
+
+        
 
 **Doctor app**
 
@@ -80,3 +88,8 @@
 
     Functionalities:
         - Create account
+
+# TODO:  
+    - Create Notification model for holding all the 
+        messages that come to warehouse for delivery worker
+    
