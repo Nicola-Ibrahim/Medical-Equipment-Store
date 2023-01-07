@@ -1,13 +1,12 @@
-from .models import Warehouse, User, Doctor, DeliveryWorker
-from rest_framework import serializers
-from rest_framework import exceptions
-from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth import authenticate
-from .profile_serializers import (
-    WarehouseProfileSerializer, 
-    DoctorProfileSerializer, 
-    DeliveryWorkerProfileSerializer
-    )
+from django.contrib.auth.password_validation import validate_password
+from rest_framework import exceptions, serializers
+
+from .models import DeliveryWorker, Doctor, User, Warehouse
+from .profiles_serializers import (DeliveryWorkerProfileSerializer,
+                                   DoctorProfileSerializer,
+                                   WarehouseProfileSerializer)
+
 
 class UserSerializer(serializers.ModelSerializer):
     """
@@ -26,6 +25,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
+        ordering = ['-id']
         profile_related_name = ''
         profile_relation_field = ''
 
@@ -85,23 +85,27 @@ class UserSerializer(serializers.ModelSerializer):
     def create(self, validated_data:dict):
 
         # Get warehouse user profile data
-        profile_data = validated_data.pop(self.Meta.profile_related_name)
+        user_profile_data = validated_data.pop(self.Meta.profile_related_name)
 
         # Remove confirm_password field value from inserting data
         validated_data.pop('confirm_password')
 
         # Create a new warehouse user
-        instance = super().create(validated_data)
+        user = super().create(validated_data)
 
         # Create profile data for the user
-        profile_data[self.Meta.profile_relation_field] = instance.id
+        user_profile_data[self.Meta.profile_relation_field] = user.id
 
         profile_serializer = self.get_profile_serializer()
-        profile_serializer = profile_serializer(data=profile_data)
+        profile_serializer = profile_serializer(data=user_profile_data)
         profile_serializer.is_valid(raise_exception=True)
+
+
+        #TODO: Check the validity of profile data before create a user 
+
         profile_serializer.save()
 
-        return instance
+        return user
 
     def get_profile_serializer(self):
         dic = {
