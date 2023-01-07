@@ -1,37 +1,19 @@
 from django.contrib import admin
-from .models import *
+from django.contrib.auth.admin import UserAdmin as DjangoUserAdmin
 
+from .models import *
 from .profiles import *
 
-from django.contrib.auth.admin import UserAdmin as DjangoUserAdmin
 # from django.utils.translation import ugettext_lazy as _
 
 
-# Register your models here.
-admin.site.register([
-
-    WarehouseProfile,
-    DoctorProfile,
-    DeliveryWorkerProfile,
-    BaseAccountantProfile,
-    DeliveryWorkerAccountantProfile,
-    WarehouseAccountantProfile,
-    AdminProfile,
-    StatisticianProfile,
-
-    Section,
-    Service
-])
-
-
-
-@admin.register(User, 
-                Warehouse, 
-                DeliveryWorker, 
-                Doctor, 
-                Admin, 
-                BaseAccountant, 
-                WarehouseAccountant, 
+@admin.register(User,
+                Warehouse,
+                DeliveryWorker,
+                Doctor,
+                Admin,
+                BaseAccountant,
+                WarehouseAccountant,
                 DeliveryWorkerAccountant,
                 )
 class UserAdmin(DjangoUserAdmin):
@@ -40,10 +22,10 @@ class UserAdmin(DjangoUserAdmin):
     fieldsets = (
         (None, {'fields': ('email', 'password')}),
         (
-            ('Personal info'), 
-            {'fields': 
+            ('Personal info'),
+            {'fields':
                 (
-                    'phone_number', 
+                    'phone_number',
                     'state',
                     'city',
                     'street',
@@ -52,19 +34,19 @@ class UserAdmin(DjangoUserAdmin):
                     'is_verified',
                     'manager',
                 )
-            }
+             }
         ),
         (
-            ('Permissions'), 
+            ('Permissions'),
             {
                 'fields': (
-                    'is_active', 
-                    'is_staff', 
+                    'is_active',
+                    'is_staff',
                     'is_superuser',
-                    'groups', 
-                    'user_permissions', 
+                    'groups',
+                    'user_permissions',
                     'type'
-                    )
+                )
             }
         ),
 
@@ -80,15 +62,14 @@ class UserAdmin(DjangoUserAdmin):
     search_fields = ('email',)
     ordering = ('email',)
 
-   
     def get_form(self, request, obj=None, **kwargs):
-        form =  super().get_form(request, obj, **kwargs)
+        form = super().get_form(request, obj, **kwargs)
 
         disabled_fields = set()
 
         # Prevent non admin user from changing some fields
         is_admin = request.user.type == User.Type.ADMIN
-        if(not is_admin):
+        if (not is_admin):
             disabled_fields |= {
                 'email',
                 'type',
@@ -104,10 +85,40 @@ class UserAdmin(DjangoUserAdmin):
 
         return form
 
-    
-    def has_delete_permission(self, request, obj= None) -> bool:
+    def has_delete_permission(self, request, obj=None) -> bool:
         is_admin = request.user.type == User.Type.ADMIN
-        if(not is_admin):
+        if (not is_admin):
             return False
-        
+
         return super().has_delete_permission(request, obj)
+
+
+# class SectionsInlineAdmin(admin.TabularInline):
+#     model = Section
+#     # fields = ['name', 'warehouse']
+
+
+# class ServicesInLineAdmin(admin.TabularInline):
+#     model = Service
+
+
+@admin.register(WarehouseProfile)
+class WarehouseProfileAdmin(admin.ModelAdmin):
+    """Define admin model for Warehouse User model."""
+    list_display = ['name', ]
+    readonly_fields = ['name',]
+    raw_id_fields = ['warehouse', ]
+
+    # inlines = [SectionsInlineAdmin, ServicesInLineAdmin]
+
+
+admin.site.register([
+    DoctorProfile,
+    DeliveryWorkerProfile,
+    BaseAccountantProfile,
+    DeliveryWorkerAccountantProfile,
+    WarehouseAccountantProfile,
+    AdminProfile,
+    StatisticianProfile,
+
+])
