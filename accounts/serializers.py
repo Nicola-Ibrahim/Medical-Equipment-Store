@@ -4,40 +4,10 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 
-from .errors import UserSerializerNotFound
 from .models import DeliveryWorker, Doctor, User, Warehouse
-from .profiles_serializers import (
-    DeliveryWorkerProfileSerializer,
-    DoctorProfileSerializer,
-    WarehouseProfileSerializer,
-)
-
-
-def get_suitable_serializer(type: str) -> UserSerializer:
-    """This a factory method to get the suitable serializer for user registration
-
-    Args:
-        type (str): the type of serializer
-
-    Raises:
-        UserSerializerNotFound: serializer not found error
-
-    Returns:
-        UserSerializer: serializer for register a user
-    """
-
-    serializers_classes = {
-        "warehouse": WarehouseUserSerializer,
-        "doctor": DoctorUserSerializer,
-        "delivery_worker": DeliveryWorkerUserSerializer,
-    }
-
-    serializer = serializers_classes.get(type)
-
-    if not serializer:
-        raise UserSerializerNotFound()
-
-    return serializer
+from .profiles_serializers import (DeliveryWorkerProfileSerializer,
+                                   DoctorProfileSerializer,
+                                   WarehouseProfileSerializer)
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -209,7 +179,7 @@ class WarehouseUserSerializer(UserSerializer):
     """
 
     # url = serializers.HyperlinkedIdentityField(
-    #     view_name='accounts:get-details',
+    #     view_name='accounts:details',
     #     lookup_field='pk',
     #     read_only=True
     # )
@@ -226,7 +196,7 @@ class WarehouseUserSerializer(UserSerializer):
 class DoctorUserSerializer(UserSerializer):
 
     # url = serializers.HyperlinkedIdentityField(
-    #     view_name='accounts:get-details',
+    #     view_name='accounts:details',
     #     lookup_field='pk',
     #     read_only=True
     # )
@@ -243,7 +213,7 @@ class DoctorUserSerializer(UserSerializer):
 class DeliveryWorkerUserSerializer(UserSerializer):
 
     # url = serializers.HyperlinkedIdentityField(
-    #     view_name='accounts:get-details',
+    #     view_name='accounts:details',
     #     lookup_field='pk',
     #     read_only=True
     # )
