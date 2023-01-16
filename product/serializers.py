@@ -7,7 +7,7 @@ from rest_framework import serializers
 class ProductSerializer(serializers.ModelSerializer):
 
     url = serializers.HyperlinkedIdentityField(
-        view_name='product:product-details',
+        view_name='product:details',
         lookup_field = 'slug',
         read_only=True,
     )

@@ -54,7 +54,7 @@ class OrderSerializer(serializers.ModelSerializer):
 
     # Add extra read_only field
     url = serializers.HyperlinkedIdentityField(
-        view_name='order:order-details',
+        view_name='order:details',
         lookup_field='pk',
         read_only=True
     )
