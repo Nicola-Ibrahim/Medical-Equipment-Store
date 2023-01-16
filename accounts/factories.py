@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 
 import django_filters.rest_framework as filters
 
-from .errors import UserModelNotFound, UserSerializerNotFound
+from .errors import UserFilterNotFound, UserModelNotFound, UserSerializerNotFound
 from .filters import DeliveryWorkerFilter, DoctorFilter, WarehouseFilter
 from .models import DeliveryWorker, Doctor, User, Warehouse
 from .serializers import (
@@ -41,7 +41,7 @@ class UserTypeModelFactory(ModelFactory):
             "delivery_worker": DeliveryWorker,
         }
 
-        model = models_classes.get(type, User)
+        model = models_classes.get(type, None)
 
         if not model:
             raise UserModelNotFound()
@@ -51,7 +51,7 @@ class UserTypeModelFactory(ModelFactory):
 
 class SerializerFactory(ABC):
     @abstractmethod
-    def get_suitable_serializer(self, type: str):
+    def get_suitable_serializer(self, type: str) -> UserSerializer:
         pass
 
 
@@ -84,9 +84,6 @@ class UserTypeSerializerFactory(SerializerFactory):
 
 
 class FilterFactory(filters.DjangoFilterBackend):
-    def __init__(self) -> None:
-        self.current_filter = None
-
     def get_suitable_filter(self, type: str) -> filters.FilterSet:
         """This a factory method to get the suitable filter for user registration
 
@@ -97,21 +94,19 @@ class FilterFactory(filters.DjangoFilterBackend):
             UserFilterNotFound: filter not found error
 
         Returns:
-            FilterSet: filter for register a user
+            FilterSet: filter compatible with user type
         """
 
-        serializers_classes = {
+        filters_classes = {
             "warehouse": WarehouseFilter,
             "doctor": DoctorFilter,
             "delivery_worker": DeliveryWorkerFilter,
         }
 
-        filter_ = serializers_classes.get(type, None)
+        filter_ = filters_classes.get(type, None)
 
-        # TODO: Repair the filter method, because it displays all users after processing
-
-        # if not filter_:
-        #     raise UserFilterNotFound()
+        if not filter_:
+            raise UserFilterNotFound()
 
         return filter_
 
@@ -119,9 +114,7 @@ class FilterFactory(filters.DjangoFilterBackend):
         """
         Return the `FilterSet` class used to filter the queryset.
         """
-        filterset_class = self.get_suitable_filter(
-            view.request.query_params.get("type")
-        )
+        filterset_class = self.get_suitable_filter(view.kwargs["user_type"])
         filterset_fields = getattr(view, "filterset_fields", None)
 
         if filterset_class:
