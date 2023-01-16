@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from rest_framework import permissions
 
 from .factories import FilterFactory, UserTypeModelFactory, UserTypeSerializerFactory
@@ -10,9 +12,16 @@ class PermissionMixin:
 
 class QuerySetMixin:
     def get_queryset(self):
+        """
+        Override method to get queryset depending on the url kwargs
+        """
 
+        # Create a model factory to create a suitable model
         model_factory = UserTypeModelFactory()
-        model = model_factory.get_suitable_model(self.request.query_params.get("type"))
+
+        # Get the model
+        model = model_factory.get_suitable_model(self.kwargs["user_type"])
+
         queryset = model.objects.all()
         return queryset
 
@@ -20,11 +29,14 @@ class QuerySetMixin:
 class SerializerParamsMixin:
     def get_serializer_class(self):
         """
-        Override method to get serializer_class depending on the url parameters
+        Override method to get serializer_class depending on the url kwargs
         """
+        # Create a serializer factory to create a suitable serializer
         serializer_factory = UserTypeSerializerFactory()
+
+        # Get the serializer
         serializer_class = serializer_factory.get_suitable_serializer(
-            self.request.query_params.get("type")
+            self.kwargs["user_type"]
         )
 
         return serializer_class
@@ -35,8 +47,10 @@ class UserTypeSerializerMixin:
         """
         Override method to get serializer_class depending on the url parameters
         """
-        # Change the serializer depending on the authenticated user type
+        # Create a serializer factory to create a suitable serializer
         serializer_factory = UserTypeSerializerFactory()
+
+        # Get the serializer
         serializer_class = serializer_factory.get_suitable_serializer(
             self.request.user.type.lower()
         )
@@ -45,19 +59,7 @@ class UserTypeSerializerMixin:
 
 
 class FilterMixin:
+
     filter_backends = [
         FilterFactory,
     ]
-
-    def filter_queryset(self, queryset):
-        """
-        Given a queryset, filter it with whichever filter backend is in use.
-
-        You are unlikely to want to override this method, although you may need
-        to call it either from a list view, or from a custom `get_object`
-        method if you want to apply the configured filtering backend to the
-        default queryset.
-        """
-        for backend in list(self.filter_backends):
-            queryset = backend().filter_queryset(self.request, queryset, self)
-        return queryset
