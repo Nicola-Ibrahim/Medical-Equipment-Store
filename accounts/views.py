@@ -23,9 +23,7 @@ from .serializers import UserLoginSerializer
 
 
 class UserLoginView(GenericAPIView):
-    """
-    Class based view to register a warehouse
-    """
+    """Login view"""
 
     serializer_class = UserLoginSerializer
     permission_classes = (AllowAny,)
@@ -39,11 +37,23 @@ class UserLoginView(GenericAPIView):
 
 
 class VerifyEmail(APIView):
-    """verify the mail that send in the mail box"""
+    """Verify the user by the token send it to the email"""
 
     permission_classes = [AllowAny]
 
-    def get(self, request):
+    def get(self, request) -> Response:
+        """Override get method to verify the new registered user via email
+
+        Args:
+            request: the incoming request
+
+        Raises:
+            jwt.ExpiredSignatureError | jwt.exceptions.DecodeError: jwt exceptions
+
+        Returns:
+            Response | Exception: rest framework response with verified message or exception
+        """
+
         token = request.GET.get("token")
         try:
             # Decode the token coming with the request
@@ -79,8 +89,14 @@ class UserSignView(SerializerParamsMixin, CreateAPIView):
     ]
     # renderer_classes = (UserRenderer,)
 
-    def post(self, request):
+    def post(self, request) -> Response:
         """Add a new user"""
+        """Override post method to control the behavior of inserting a new user
+
+        Returns:
+            Response: rest framework response with user data
+        """
+
         user_data = request.data
         serializer = self.get_serializer(data=user_data, context={"request": request})
         serializer.is_valid(raise_exception=True)
@@ -101,7 +117,15 @@ class UserDetailsView(UserTypeSerializerMixin, RetrieveUpdateDestroyAPIView):
 
     queryset = User.objects.all()
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs) -> Response:
+        """Override get method to obtain details depending on login user type
+
+        Args:
+            request: incoming request
+
+        Returns:
+            Response: rest framework response with user data
+        """
         user = self.get_queryset().get(id=request.user.id)
         serializer = self.get_serializer(user, context={"request": request})
         return Response(serializer.data)
