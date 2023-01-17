@@ -129,5 +129,5 @@ dmypy.json
 .pyre/
 
 
-# migrations
-migrations/
+# media contents
+*.jpg

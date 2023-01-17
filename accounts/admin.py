@@ -120,5 +120,6 @@ admin.site.register([
     WarehouseAccountantProfile,
     AdminProfile,
     StatisticianProfile,
+    Subscription
 
 ])
