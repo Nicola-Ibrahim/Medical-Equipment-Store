@@ -5,9 +5,11 @@ from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 
 from .models import DeliveryWorker, Doctor, User, Warehouse
-from .profiles_serializers import (DeliveryWorkerProfileSerializer,
-                                   DoctorProfileSerializer,
-                                   WarehouseProfileSerializer)
+from .profiles_serializers import (
+    DeliveryWorkerProfileSerializer,
+    DoctorProfileSerializer,
+    WarehouseProfileSerializer,
+)
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -29,6 +31,7 @@ class UserSerializer(serializers.ModelSerializer):
         ordering = ["-id"]
         profile_related_name = ""
         profile_relation_field = ""
+        profile_serializer = None
 
         fields = [
             "id",
@@ -45,6 +48,7 @@ class UserSerializer(serializers.ModelSerializer):
             "manager_name",
             "is_staff",
             "is_active",
+            "is_verified",
             "groups",
             "manager",
         ]
@@ -57,6 +61,17 @@ class UserSerializer(serializers.ModelSerializer):
         }
 
     def validate(self, attrs):
+        """Override validate method to ensure user entered the same password values
+
+        Args:
+            attrs (list): the user data
+
+        Raises:
+            serializers.ValidationError: raise an error when the two inserted passwords are not similar
+
+        Returns:
+            user data: the user data after validation
+        """
         if attrs["password"] != attrs["confirm_password"]:
             raise serializers.ValidationError(
                 {"password": "Password fields didn't match."}
@@ -83,38 +98,95 @@ class UserSerializer(serializers.ModelSerializer):
 
         return instance
 
-    def create(self, validated_data: dict):
+    def create(self, validated_data: dict[str, str]) -> User:
+        """Override the create method create a new user with the profile data
 
-        # Get warehouse user profile data
+        Args:
+            validated_data (dict[str, str]): validated data by the serializer
+
+        Returns:
+            User: a new inserted user
+        """
+
+        # Get the profile data of the user
         user_profile_data = validated_data.pop(self.Meta.profile_related_name)
 
-        # Remove confirm_password field value from inserting data
+        # Remove confirm_password field value from the inserted data
         validated_data.pop("confirm_password")
 
-        # Create a new warehouse user
+        # Create a new warehouse user without saving
         user = super().create(validated_data)
 
         # Create profile data for the user
         user_profile_data[self.Meta.profile_relation_field] = user.id
-
-        profile_serializer = self.get_profile_serializer()
-        profile_serializer = profile_serializer(data=user_profile_data)
+        profile_serializer = self.Meta.profile_serializer(data=user_profile_data)
         profile_serializer.is_valid(raise_exception=True)
 
-        # TODO: Check the validity of profile data before create a user
-
+        # Save the user's profile
         profile_serializer.save()
+
+        # Save the user
+        user.save()
 
         return user
 
-    def get_profile_serializer(self):
-        dic = {
-            "warehouse_profile": WarehouseProfileSerializer,
-            "doctor_profile": DoctorProfileSerializer,
-            "delivery_worker_profile": DeliveryWorkerProfileSerializer,
-        }
 
-        return dic.get(self.Meta.profile_related_name)
+class WarehouseUserSerializer(UserSerializer):
+
+    """
+    A subclass of UserSerializer for handling warehouse users
+    """
+
+    # url = serializers.HyperlinkedIdentityField(
+    #     view_name='accounts:details',
+    #     lookup_field='pk',
+    #     read_only=True
+    # )
+
+    profile = WarehouseProfileSerializer(source="warehouse_profile")
+
+    class Meta(UserSerializer.Meta):
+        model = Warehouse
+        fields = UserSerializer.Meta.fields + ["profile"]
+        profile_related_name = "warehouse_profile"
+        profile_relation_field = "warehouse"
+        profile_serializer = WarehouseProfileSerializer
+
+
+class DoctorUserSerializer(UserSerializer):
+
+    # url = serializers.HyperlinkedIdentityField(
+    #     view_name='accounts:details',
+    #     lookup_field='pk',
+    #     read_only=True
+    # )
+
+    profile = DoctorProfileSerializer(source="doctor_profile")
+
+    class Meta(UserSerializer.Meta):
+        model = Doctor
+        fields = UserSerializer.Meta.fields + ["profile"]
+        profile_related_name = "doctor_profile"
+        profile_relation_field = "doctor"
+        profile_serializer = DoctorProfileSerializer
+
+
+class DeliveryWorkerUserSerializer(UserSerializer):
+
+    # url = serializers.HyperlinkedIdentityField(
+    #     view_name='accounts:details',
+    #     lookup_field='pk',
+    #     read_only=True
+    # )
+
+    profile = DeliveryWorkerProfileSerializer(source="delivery_worker_profile")
+
+    class Meta(UserSerializer.Meta):
+        model = DeliveryWorker
+        fields = UserSerializer.Meta.fields + ["profile"]
+        profile_related_name = "delivery_worker_profile"
+        profile_relation_field = "delivery_worker"
+        profile_serializer = DeliveryWorkerProfileSerializer
 
 
 class UserLoginSerializer(serializers.Serializer):
@@ -170,58 +242,3 @@ class UserLoginSerializer(serializers.Serializer):
         attrs["email"] = user.email
         attrs["tokens"] = user.tokens()
         return super().validate(attrs)
-
-
-class WarehouseUserSerializer(UserSerializer):
-
-    """
-    A subclass of UserSerializer for handling warehouse users
-    """
-
-    # url = serializers.HyperlinkedIdentityField(
-    #     view_name='accounts:details',
-    #     lookup_field='pk',
-    #     read_only=True
-    # )
-
-    profile = WarehouseProfileSerializer(source="warehouse_profile")
-
-    class Meta(UserSerializer.Meta):
-        model = Warehouse
-        fields = UserSerializer.Meta.fields + ["profile"]
-        profile_related_name = "warehouse_profile"
-        profile_relation_field = "warehouse"
-
-
-class DoctorUserSerializer(UserSerializer):
-
-    # url = serializers.HyperlinkedIdentityField(
-    #     view_name='accounts:details',
-    #     lookup_field='pk',
-    #     read_only=True
-    # )
-
-    profile = DoctorProfileSerializer(source="doctor_profile")
-
-    class Meta(UserSerializer.Meta):
-        model = Doctor
-        fields = UserSerializer.Meta.fields + ["profile"]
-        profile_related_name = "doctor_profile"
-        profile_relation_field = "doctor"
-
-
-class DeliveryWorkerUserSerializer(UserSerializer):
-
-    # url = serializers.HyperlinkedIdentityField(
-    #     view_name='accounts:details',
-    #     lookup_field='pk',
-    #     read_only=True
-    # )
-
-    profile = DeliveryWorkerProfileSerializer(source="delivery_worker_profile")
-
-    class Meta(UserSerializer.Meta):
-        model = DeliveryWorker
-        fields = UserSerializer.Meta.fields + ["profile"]
-        profile_related_name = "delivery_worker_profile"
-        profile_relation_field = "delivery_worker"
