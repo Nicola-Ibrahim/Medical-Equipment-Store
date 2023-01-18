@@ -72,7 +72,9 @@ class User(AbstractUser, PrintableModel):
     manager = models.ForeignKey(
         "Admin", on_delete=models.SET_NULL, null=True, blank=True
     )
-    subscription = models.ForeignKey("Subscription", on_delete=models.DO_NOTHING)
+    subscription = models.ForeignKey(
+        "Subscription", null=True, on_delete=models.DO_NOTHING
+    )
 
     def __str__(self) -> str:
         return self.email
