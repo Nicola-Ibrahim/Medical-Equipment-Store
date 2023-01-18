@@ -84,19 +84,19 @@ class VerifyEmail(APIView):
 
 
 class UserSignView(SerializerParamsMixin, CreateAPIView):
+    """View for adding a new user"""
+
     permission_classes = [
         AllowAny,
     ]
     # renderer_classes = (UserRenderer,)
 
-    def post(self, request) -> Response:
-        """Add a new user"""
+    def post(self, request, *args, **kwargs) -> Response:
         """Override post method to control the behavior of inserting a new user
 
         Returns:
             Response: rest framework response with user data
         """
-
         user_data = request.data
         serializer = self.get_serializer(data=user_data, context={"request": request})
         serializer.is_valid(raise_exception=True)
@@ -104,6 +104,7 @@ class UserSignView(SerializerParamsMixin, CreateAPIView):
 
         user_data = serializer.data
 
+        
         # Send verification message to user's email
         send_verification(user_data=user_data, request=request)
 
