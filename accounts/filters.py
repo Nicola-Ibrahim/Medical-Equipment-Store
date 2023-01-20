@@ -2,8 +2,16 @@ from __future__ import annotations
 
 import django_filters.rest_framework as filters
 
-from .models import DeliveryWorker, Doctor, Warehouse
+from .models import DeliveryWorker, Doctor, User, Warehouse
 
+
+class UserFilter(filters.FilterSet):
+    class Meta:
+        model = User
+        fields = {
+            "email": ["icontains"],
+            "is_verified": ["exact"],
+        }
 
 
 class WarehouseFilter(filters.FilterSet):
