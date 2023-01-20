@@ -1,0 +1,36 @@
+[
+{
+    "model": "auth.group",
+    "pk": 1,
+    "fields": {
+        "name": "warehouses_group",
+        "permissions": [
+            49,
+            50,
+            51,
+            52,
+            101,
+            102,
+            103,
+            104
+        ]
+    }
+},
+{
+    "model": "auth.group",
+    "pk": 2,
+    "fields": {
+        "name": "doctors_group",
+        "permissions": [
+            41,
+            42,
+            43,
+            44,
+            105,
+            106,
+            107,
+            108
+        ]
+    }
+}
+]
