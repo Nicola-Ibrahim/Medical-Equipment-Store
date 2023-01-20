@@ -1,6 +1,4 @@
 import jwt
-from core.services import send_verification
-from home import settings
 from rest_framework import status
 from rest_framework.generics import (
     CreateAPIView,
@@ -12,10 +10,15 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from core.services import send_verification
+from home import settings
+
 from .mixins import (
     FilterMixin,
-    QuerySetMixin,
-    SerializerParamsMixin,
+    KwargUserTypeQuerySetMixin,
+    KwargUserTypeSerializerMixin,
+    PermissionMixin,
+    UserTypeQuerySetMixin,
     UserTypeSerializerMixin,
 )
 from .models import User
@@ -39,7 +42,7 @@ class UserLoginView(GenericAPIView):
 class VerifyEmail(APIView):
     """Verify the user by the token send it to the email"""
 
-    permission_classes = [AllowAny]
+    permission_classes = (AllowAny,)
 
     def get(self, request) -> Response:
         """Override get method to verify the new registered user via email
@@ -83,13 +86,10 @@ class VerifyEmail(APIView):
             )
 
 
-class UserSignView(SerializerParamsMixin, CreateAPIView):
+class UserSignView(KwargUserTypeSerializerMixin, CreateAPIView):
     """View for adding a new user"""
 
-    permission_classes = [
-        AllowAny,
-    ]
-    # renderer_classes = (UserRenderer,)
+    permission_classes = (AllowAny,)
 
     def post(self, request, *args, **kwargs) -> Response:
         """Override post method to control the behavior of inserting a new user
@@ -103,20 +103,21 @@ class UserSignView(SerializerParamsMixin, CreateAPIView):
         serializer.save()
 
         user_data = serializer.data
-
-        
         # Send verification message to user's email
         send_verification(user_data=user_data, request=request)
 
         return Response(user_data, status=status.HTTP_201_CREATED)
 
 
-class UserDetailsView(UserTypeSerializerMixin, RetrieveUpdateDestroyAPIView):
+class UserDetailsView(
+    UserTypeQuerySetMixin,
+    UserTypeSerializerMixin,
+    PermissionMixin,
+    RetrieveUpdateDestroyAPIView,
+):
     """
     Class based view to Get Warehouse User Details using Token Authentication
     """
-
-    queryset = User.objects.all()
 
     def get(self, request, *args, **kwargs) -> Response:
         """Override get method to obtain details depending on login user type
@@ -127,10 +128,43 @@ class UserDetailsView(UserTypeSerializerMixin, RetrieveUpdateDestroyAPIView):
         Returns:
             Response: rest framework response with user data
         """
-        user = self.get_queryset().get(id=request.user.id)
-        serializer = self.get_serializer(user, context={"request": request})
+
+        serializer = self.get_serializer(request.user, context={"request": request})
         return Response(serializer.data)
 
+    def get_object(self):
+        """
+        Returns the object the view is displaying.
 
-class UsersListView(QuerySetMixin, UserTypeSerializerMixin, FilterMixin, ListAPIView):
+        You may want to override this if you need to provide non-standard
+        queryset lookups.  Eg if objects are referenced using multiple
+        keyword arguments in the url conf.
+        """
+        queryset = self.filter_queryset(self.get_queryset())
+
+        print("-" * 40)
+        print(self.lookup_url_kwarg)
+        print("-" * 40)
+
+        filter_kwargs = {self.lookup_field: self.kwargs[self.lookup_url_kwarg]}
+        obj = get_object_or_404(queryset, **filter_kwargs)
+
+        # May raise a permission denied
+        self.check_object_permissions(self.request, obj)
+
+        return obj
+
+    # def destroy(self, request, *args, **kwargs):
+    #     instance = self.get_object()
+    #     self.perform_destroy(instance)
+    #     return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class UsersListView(
+    KwargUserTypeQuerySetMixin,
+    KwargUserTypeSerializerMixin,
+    FilterMixin,
+    PermissionMixin,
+    ListAPIView,
+):
     pass
