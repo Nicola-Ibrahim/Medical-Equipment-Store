@@ -10,32 +10,41 @@ class PermissionMixin:
     permission_classes = [CustomDjangoModelPermission, permissions.IsAuthenticated]
 
 
-class QuerySetMixin:
+class KwargUserTypeQuerySetMixin:
     def get_queryset(self):
         """
         Override method to get queryset depending on the url kwargs
         """
 
-        # Create a model factory to create a suitable model
-        model_factory = UserTypeModelFactory()
-
         # Get the model
-        model = model_factory.get_suitable_model(self.kwargs["user_type"])
-
+        model = UserTypeModelFactory().get_suitable_model(self.kwargs["user_type"])
+        print(model)
         queryset = model.objects.all()
         return queryset
 
 
-class SerializerParamsMixin:
+class UserTypeQuerySetMixin:
+    def get_queryset(self):
+        """
+        Override method to get queryset depending on the url kwargs
+        """
+
+        # Get the model
+        model = UserTypeModelFactory().get_suitable_model(
+            self.request.user.type.lower()
+        )
+        queryset = model.objects.all()
+        return queryset
+
+
+class KwargUserTypeSerializerMixin:
     def get_serializer_class(self):
         """
         Override method to get serializer_class depending on the url kwargs
         """
-        # Create a serializer factory to create a suitable serializer
-        serializer_factory = UserTypeSerializerFactory()
 
         # Get the serializer
-        serializer_class = serializer_factory.get_suitable_serializer(
+        serializer_class = UserTypeSerializerFactory().get_suitable_serializer(
             self.kwargs["user_type"]
         )
 
@@ -45,13 +54,11 @@ class SerializerParamsMixin:
 class UserTypeSerializerMixin:
     def get_serializer_class(self):
         """
-        Override method to get serializer_class depending on the url parameters
+        Override method to get serializer_class depending on the url kwargs
         """
-        # Create a serializer factory to create a suitable serializer
-        serializer_factory = UserTypeSerializerFactory()
 
         # Get the serializer
-        serializer_class = serializer_factory.get_suitable_serializer(
+        serializer_class = UserTypeSerializerFactory().get_suitable_serializer(
             self.request.user.type.lower()
         )
 
