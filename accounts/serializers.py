@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from collections import OrderedDict
+
 from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
@@ -24,7 +26,9 @@ class UserSerializer(serializers.ModelSerializer):
     )
     confirm_password = serializers.CharField(write_only=True, required=True)
 
-    # Reverse relation
+    # url = serializers.HyperlinkedIdentityField(
+    #     view_name="accounts:details", read_only=True
+    # )
 
     class Meta:
         model = User
@@ -137,12 +141,6 @@ class WarehouseUserSerializer(UserSerializer):
     A subclass of UserSerializer for handling warehouse users
     """
 
-    # url = serializers.HyperlinkedIdentityField(
-    #     view_name='accounts:details',
-    #     lookup_field='pk',
-    #     read_only=True
-    # )
-
     profile = WarehouseProfileSerializer(source="warehouse_profile")
 
     class Meta(UserSerializer.Meta):
@@ -155,12 +153,6 @@ class WarehouseUserSerializer(UserSerializer):
 
 class DoctorUserSerializer(UserSerializer):
 
-    # url = serializers.HyperlinkedIdentityField(
-    #     view_name='accounts:details',
-    #     lookup_field='pk',
-    #     read_only=True
-    # )
-
     profile = DoctorProfileSerializer(source="doctor_profile")
 
     class Meta(UserSerializer.Meta):
@@ -172,12 +164,6 @@ class DoctorUserSerializer(UserSerializer):
 
 
 class DeliveryWorkerUserSerializer(UserSerializer):
-
-    # url = serializers.HyperlinkedIdentityField(
-    #     view_name='accounts:details',
-    #     lookup_field='pk',
-    #     read_only=True
-    # )
 
     profile = DeliveryWorkerProfileSerializer(source="delivery_worker_profile")
 
@@ -195,6 +181,7 @@ class UserLoginSerializer(serializers.Serializer):
     A serializer for handling the login process for a user
     """
 
+    # Determine email and password fields
     email = serializers.CharField(max_length=255)
     password = serializers.CharField(
         label="Password",
@@ -204,6 +191,9 @@ class UserLoginSerializer(serializers.Serializer):
         write_only=True,
     )
 
+    type = serializers.ChoiceField(User.Type, read_only=True)
+
+    # tokens field to return refresh and access tokens for the logged in user
     tokens = serializers.SerializerMethodField()
 
     class Meta:
@@ -215,12 +205,35 @@ class UserLoginSerializer(serializers.Serializer):
             "tokens",
         ]
 
-    def get_tokens(self, obj):
+    def get_tokens(self, obj: OrderedDict) -> dict:
+        """Get the generated user's tokens
+
+        Args:
+            obj (OrderedDict): the inserted serializer object's data
+
+        Returns:
+            dict: access and refresh tokens
+        """
+
+        # Get the user
         user = self.Meta.model.objects.get(email=obj["email"])
 
         return {"refresh": user.tokens()["refresh"], "access": user.tokens()["access"]}
 
-    def validate(self, attrs):
+    def validate(self, attrs: OrderedDict) -> OrderedDict:
+        """Validate the user's logged in data
+
+        Args:
+            attrs (OrderedDict): the inserted serializer object's data
+
+        Raises:
+            serializers.ValidationError: Unable to log
+            serializers.ValidationError: Account disabled
+            serializers.ValidationError: Account not verified
+
+        Returns:
+            OrderedDict: the attributes of the logged in user
+        """
         email = attrs.get("email")
         password = attrs.get("password")
 
@@ -237,8 +250,9 @@ class UserLoginSerializer(serializers.Serializer):
                 raise serializers.ValidationError("Account disabled, contact admin")
 
             if not user.is_verified:
-                raise serializers.ValidationError("Email is not verified")
+                raise serializers.ValidationError("Account is not verified")
 
         attrs["email"] = user.email
+        attrs["type"] = user.type
         attrs["tokens"] = user.tokens()
         return super().validate(attrs)
