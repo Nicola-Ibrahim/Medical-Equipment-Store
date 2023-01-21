@@ -1,7 +1,8 @@
 """
-This file contains only user models
-Also, proxy models added fot more customization on 
-users to get subgroup of users 
+This file contains:
+custom user model
+proxy models of multiple users type
+other models related to user
 """
 
 from itertools import chain
@@ -11,7 +12,7 @@ from django.core.validators import validate_email
 from django.db import models
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .models_manager import ProxyUserManger, UserManager
+from .models_manager import CustomUserManager, ProxyUserManger
 
 
 class PrintableModel(models.Model):
@@ -33,7 +34,7 @@ class PrintableModel(models.Model):
 
 class User(AbstractUser, PrintableModel):
 
-    objects = UserManager()
+    objects = CustomUserManager()
 
     class Type(models.TextChoices):
         DOCTOR = "Doctor", "doctor"
