@@ -1,25 +1,27 @@
 import jwt
+from core.services import send_verification
+from django.shortcuts import get_object_or_404
+from home import settings
 from rest_framework import status
 from rest_framework.generics import (
     CreateAPIView,
+    DestroyAPIView,
     GenericAPIView,
     ListAPIView,
-    RetrieveUpdateDestroyAPIView,
+    RetrieveAPIView,
 )
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from core.services import send_verification
-from home import settings
-
 from .mixins import (
+    DeleteUserPermissionMixin,
     FilterMixin,
+    InUserTypeQuerySetMixin,
+    InUserTypeSerializerMixin,
     KwargUserTypeQuerySetMixin,
     KwargUserTypeSerializerMixin,
     PermissionMixin,
-    UserTypeQuerySetMixin,
-    UserTypeSerializerMixin,
 )
 from .models import User
 from .serializers import UserLoginSerializer
@@ -110,10 +112,10 @@ class UserSignView(KwargUserTypeSerializerMixin, CreateAPIView):
 
 
 class UserDetailsView(
-    UserTypeQuerySetMixin,
-    UserTypeSerializerMixin,
+    InUserTypeQuerySetMixin,
+    InUserTypeSerializerMixin,
     PermissionMixin,
-    RetrieveUpdateDestroyAPIView,
+    RetrieveAPIView,
 ):
     """
     Class based view to Get Warehouse User Details using Token Authentication
@@ -132,21 +134,20 @@ class UserDetailsView(
         serializer = self.get_serializer(request.user, context={"request": request})
         return Response(serializer.data)
 
+
+class UserDeleteView(
+    InUserTypeQuerySetMixin,
+    InUserTypeSerializerMixin,
+    DeleteUserPermissionMixin,
+    DestroyAPIView,
+):
     def get_object(self):
         """
         Returns the object the view is displaying.
-
-        You may want to override this if you need to provide non-standard
-        queryset lookups.  Eg if objects are referenced using multiple
-        keyword arguments in the url conf.
         """
         queryset = self.filter_queryset(self.get_queryset())
 
-        print("-" * 40)
-        print(self.lookup_url_kwarg)
-        print("-" * 40)
-
-        filter_kwargs = {self.lookup_field: self.kwargs[self.lookup_url_kwarg]}
+        filter_kwargs = {self.lookup_field: self.request.user.id}
         obj = get_object_or_404(queryset, **filter_kwargs)
 
         # May raise a permission denied
@@ -154,10 +155,29 @@ class UserDetailsView(
 
         return obj
 
-    # def destroy(self, request, *args, **kwargs):
-    #     instance = self.get_object()
-    #     self.perform_destroy(instance)
-    #     return Response(status=status.HTTP_204_NO_CONTENT)
+    def destroy(self, request, *args, **kwargs):
+        """Override destroy method to handle deleting for multiple users
+
+        Args:
+            request: incoming request
+        """
+
+        # Get the users to be deleted
+        ids = request.data["ids"]
+
+        # Get the user who perform the delete action
+        instance = self.get_object()
+
+        # Execute delete the ids
+        self.perform_destroy(ids)
+
+        msg = {"details": "All the users have been removed!"}
+        return Response(data=msg, status=status.HTTP_204_NO_CONTENT)
+
+    def perform_destroy(self, ids):
+        queryset = self.filter_queryset(self.get_queryset())
+        filter_kwargs = {"pk__in": ids}
+        users_deleted = queryset.filter(**filter_kwargs).delete()
 
 
 class UsersListView(
