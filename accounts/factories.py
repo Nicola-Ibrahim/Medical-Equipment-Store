@@ -37,6 +37,7 @@ class UserTypeModelFactory(ModelFactory):
 
         models_classes = {
             "user": User,
+            "admin": User,
             "warehouse": Warehouse,
             "doctor": Doctor,
             "delivery_worker": DeliveryWorker,
@@ -71,6 +72,7 @@ class UserTypeSerializerFactory(SerializerFactory):
 
         serializers_classes = {
             "user": UserSerializer,
+            "admin": UserSerializer,
             "warehouse": WarehouseUserSerializer,
             "doctor": DoctorUserSerializer,
             "delivery_worker": DeliveryWorkerUserSerializer,
@@ -84,7 +86,7 @@ class UserTypeSerializerFactory(SerializerFactory):
         return serializer
 
 
-class FilterFactory(filters.DjangoFilterBackend):
+class UserTypeFilterFactory(filters.DjangoFilterBackend):
     def get_suitable_filter(self, type: str) -> filters.FilterSet:
         """This a factory method to get the suitable filter for user registration
 
