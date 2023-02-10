@@ -35,3 +35,15 @@ class UserModelNotFound(exceptions.NotFound):
     def __init__(self, message=None):
         self.message = "Model not found" if not message else message
         super().__init__(self.message)
+
+
+class DeleteMultipleUsers(exceptions.MethodNotAllowed):
+    """Exception class for not allowed the action of deleting multiple users
+
+    Args:
+        Exception (exceptions.MethodNotAllowed): not allowed
+    """
+
+    def __init__(self, message=None):
+        self.message = "Deleting action not allowed for non admin user" if not message else message
+        super().__init__(self.message)

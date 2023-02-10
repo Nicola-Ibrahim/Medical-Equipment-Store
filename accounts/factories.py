@@ -5,7 +5,7 @@ from abc import ABC, abstractmethod
 import django_filters.rest_framework as filters
 
 from .errors import UserFilterNotFound, UserModelNotFound, UserSerializerNotFound
-from .filters import DeliveryWorkerFilter, DoctorFilter, WarehouseFilter
+from .filters import DeliveryWorkerFilter, DoctorFilter, UserFilter, WarehouseFilter
 from .models import DeliveryWorker, Doctor, User, Warehouse
 from .serializers import (
     DeliveryWorkerUserSerializer,
@@ -36,11 +36,12 @@ class UserTypeModelFactory(ModelFactory):
         """
 
         models_classes = {
+            "user": User,
+            "admin": User,
             "warehouse": Warehouse,
             "doctor": Doctor,
             "delivery_worker": DeliveryWorker,
         }
-
         model = models_classes.get(type, None)
 
         if not model:
@@ -70,12 +71,14 @@ class UserTypeSerializerFactory(SerializerFactory):
         """
 
         serializers_classes = {
+            "user": UserSerializer,
+            "admin": UserSerializer,
             "warehouse": WarehouseUserSerializer,
             "doctor": DoctorUserSerializer,
             "delivery_worker": DeliveryWorkerUserSerializer,
         }
 
-        serializer = serializers_classes.get(type, UserSerializer)
+        serializer = serializers_classes.get(type, None)
 
         if not serializer:
             raise UserSerializerNotFound()
@@ -83,7 +86,7 @@ class UserTypeSerializerFactory(SerializerFactory):
         return serializer
 
 
-class FilterFactory(filters.DjangoFilterBackend):
+class UserTypeFilterFactory(filters.DjangoFilterBackend):
     def get_suitable_filter(self, type: str) -> filters.FilterSet:
         """This a factory method to get the suitable filter for user registration
 
@@ -98,6 +101,7 @@ class FilterFactory(filters.DjangoFilterBackend):
         """
 
         filters_classes = {
+            "user": UserFilter,
             "warehouse": WarehouseFilter,
             "doctor": DoctorFilter,
             "delivery_worker": DeliveryWorkerFilter,

@@ -2,56 +2,70 @@ from __future__ import annotations
 
 from rest_framework import permissions
 
-from .factories import FilterFactory, UserTypeModelFactory, UserTypeSerializerFactory
-from .permissions import CustomDjangoModelPermission
+from .factories import (
+    UserTypeFilterFactory,
+    UserTypeModelFactory,
+    UserTypeSerializerFactory,
+)
+from .permissions import BasePermission, DeleteUserPermission
 
 
 class PermissionMixin:
-    permission_classes = [CustomDjangoModelPermission, permissions.IsAuthenticated]
+    permission_classes = [BasePermission, permissions.IsAuthenticated]
 
 
-class QuerySetMixin:
+class DeleteUserPermissionMixin:
+    permission_classes = [DeleteUserPermission, permissions.IsAuthenticated]
+
+
+class KwargUserTypeQuerySetMixin:
     def get_queryset(self):
         """
         Override method to get queryset depending on the url kwargs
         """
 
-        # Create a model factory to create a suitable model
-        model_factory = UserTypeModelFactory()
-
         # Get the model
-        model = model_factory.get_suitable_model(self.kwargs["user_type"])
-
+        model = UserTypeModelFactory().get_suitable_model(self.kwargs["user_type"])
         queryset = model.objects.all()
         return queryset
 
 
-class SerializerParamsMixin:
+class InUserTypeQuerySetMixin:
+    def get_queryset(self):
+        """
+        Override method to get queryset depending on the url kwargs
+        """
+
+        # Get the model
+        model = UserTypeModelFactory().get_suitable_model(
+            self.request.user.type.lower()
+        )
+        queryset = model.objects.all()
+        return queryset
+
+
+class KwargUserTypeSerializerMixin:
     def get_serializer_class(self):
         """
         Override method to get serializer_class depending on the url kwargs
         """
-        # Create a serializer factory to create a suitable serializer
-        serializer_factory = UserTypeSerializerFactory()
 
         # Get the serializer
-        serializer_class = serializer_factory.get_suitable_serializer(
+        serializer_class = UserTypeSerializerFactory().get_suitable_serializer(
             self.kwargs["user_type"]
         )
 
         return serializer_class
 
 
-class UserTypeSerializerMixin:
+class InUserTypeSerializerMixin:
     def get_serializer_class(self):
         """
-        Override method to get serializer_class depending on the url parameters
+        Override method to get serializer_class depending on the url kwargs
         """
-        # Create a serializer factory to create a suitable serializer
-        serializer_factory = UserTypeSerializerFactory()
 
         # Get the serializer
-        serializer_class = serializer_factory.get_suitable_serializer(
+        serializer_class = UserTypeSerializerFactory().get_suitable_serializer(
             self.request.user.type.lower()
         )
 
@@ -61,5 +75,5 @@ class UserTypeSerializerMixin:
 class FilterMixin:
 
     filter_backends = [
-        FilterFactory,
+        UserTypeFilterFactory,
     ]

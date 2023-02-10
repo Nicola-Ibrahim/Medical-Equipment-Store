@@ -1,125 +1,133 @@
 from rest_framework import serializers
 
-from .profiles import (DeliveryWorkerProfile, DoctorProfile, Section, Service,
-                       WarehouseProfile)
+from .profiles import (
+    DeliveryWorkerProfile,
+    DoctorProfile,
+    Section,
+    Service,
+    WarehouseProfile,
+)
 
 
 class SectionSerializer(serializers.ModelSerializer):
 
-    warehouse_name = serializers.ReadOnlyField(source='warehouse.name')
+    warehouse_name = serializers.ReadOnlyField(source="warehouse.name")
 
     class Meta:
         model = Section
-        fields = ['name', 'warehouse_name']
+        fields = ["name", "warehouse_name"]
 
 
 class ServiceSerializer(serializers.ModelSerializer):
 
-    warehouse_name = serializers.ReadOnlyField(source='warehouse.name')
+    warehouse_name = serializers.ReadOnlyField(source="warehouse.name")
 
     class Meta:
         model = Service
-        fields = ['name', 'warehouse_name']
+        fields = ["name", "warehouse_name"]
 
 
 class WarehouseProfileSerializer(serializers.ModelSerializer):
 
-    sections = serializers.PrimaryKeyRelatedField(
-        many=True,
-        queryset=Section.objects.all()
-    )
-    services = serializers.PrimaryKeyRelatedField(
-        many=True,
-        queryset=Service.objects.all()
-    )
+    # sections = serializers.PrimaryKeyRelatedField(
+    #     many=True, queryset=Section.objects.all()
+    # )
+    # services = serializers.PrimaryKeyRelatedField(
+    #     many=True, queryset=Service.objects.all()
+    # )
 
     class Meta:
         model = WarehouseProfile
-        fields = ['name', 'sections', 'services',
-                  'working_hours', 'profit_percentage', 'warehouse']
+        fields = [
+            "name",
+            # "sections",
+            # "services",
+            "working_hours",
+            "profit_percentage",
+            "warehouse",
+        ]
 
         extra_kwargs = {
-            'warehouse': {'write_only': True},
+            "warehouse": {"write_only": True},
         }
-        validators = []
 
-    def validate_sections(self, values: list):
-        """Validate inserted sections values
+    # def validate_sections(self, values: list):
+    #     """Validate inserted sections values
 
-        Args:
-            values (list): list of sections
-        """
-        def get_id(value: int | str | Section):
-            """Get section id
+    #     Args:
+    #         values (list): list of sections
+    #     """
 
-            Args:
-                value (int | str | Section): section value
+    #     def get_id(value: int | str | Section):
+    #         """Get section id
 
-            Returns:
-                id (int): The returned id of a section
-            """
-            match value:
-                case int():
-                    return value
+    #         Args:
+    #             value (int | str | Section): section value
 
-                case Section():
-                    id = Section.objects.get(name=value).pk
+    #         Returns:
+    #             id (int): The returned id of a section
+    #         """
+    #         match value:
+    #             case int():
+    #                 return value
 
-                case str():
-                    id = Section.objects.get(name=value).pk
+    #             case Section():
+    #                 id = Section.objects.get(name=value).pk
 
-            return id
+    #             case str():
+    #                 id = Section.objects.get(name=value).pk
 
-        id_values = list(map(get_id, values))
-        return id_values
+    #         return id
 
-    def validate_services(self, values: list):
-        """Validate inserted services values
+    #     id_values = list(map(get_id, values))
+    #     return id_values
 
-        Args:
-            values (list): list of services
-        """
-        def get_id(instance: int | str | Service):
-            """Get service id
+    # def validate_services(self, values: list):
+    #     """Validate inserted services values
 
-            Args:
-                value (int | str | Section): service value
+    #     Args:
+    #         values (list): list of services
+    #     """
 
-            Returns:
-                id: The returned id of a service
-            """
-            match instance:
-                case int():
-                    return id
-                case Service():
-                    id = Service.objects.get(name=instance).pk
+    #     def get_id(instance: int | str | Service):
+    #         """Get service id
 
-                case str():
-                    id = Service.objects.get(name=instance).pk
+    #         Args:
+    #             value (int | str | Section): service value
 
-            return id
+    #         Returns:
+    #             id: The returned id of a service
+    #         """
+    #         match instance:
+    #             case int():
+    #                 return id
+    #             case Service():
+    #                 id = Service.objects.get(name=instance).pk
 
-        id_values = list(map(get_id, values))
-        return id_values
+    #             case str():
+    #                 id = Service.objects.get(name=instance).pk
+
+    #         return id
+
+    #     id_values = list(map(get_id, values))
+    #     return id_values
 
 
 class DoctorProfileSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = DoctorProfile
-        fields = '__all__'
+        fields = ["first_name", "last_name", "doctor"]
 
         extra_kwargs = {
-            'doctor': {'write_only': True},
+            "doctor": {"write_only": True},
         }
 
 
 class DeliveryWorkerProfileSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = DeliveryWorkerProfile
-        fields = '__all__'
+        fields = "__all__"
 
         extra_kwargs = {
-            'delivery_worker': {'write_only': True},
+            "delivery_worker": {"write_only": True},
         }
