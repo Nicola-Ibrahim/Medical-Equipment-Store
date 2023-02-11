@@ -1,7 +1,5 @@
 import jwt
-from core.services import send_verification
 from django.shortcuts import get_object_or_404
-from home import settings
 from rest_framework import status
 from rest_framework.generics import (
     CreateAPIView,
@@ -9,10 +7,14 @@ from rest_framework.generics import (
     GenericAPIView,
     ListAPIView,
     RetrieveAPIView,
+    UpdateAPIView,
 )
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
+from core.services import send_verification
+from home import settings
 
 from .mixins import (
     DeleteUserPermissionMixin,
@@ -22,9 +24,10 @@ from .mixins import (
     KwargUserTypeQuerySetMixin,
     KwargUserTypeSerializerMixin,
     PermissionMixin,
+    UpdateUserPermissionMixin,
 )
 from .models import User
-from .serializers import UserLoginSerializer
+from .serializers import UserLoginSerializer, UserSerializer
 
 
 class UserLoginView(GenericAPIView):
@@ -135,6 +138,43 @@ class UserDetailsView(
         return Response(serializer.data)
 
 
+class UserUpdateView(
+    InUserTypeQuerySetMixin,
+    # InUserTypeSerializerMixin,
+    PermissionMixin,
+    UpdateAPIView,
+):
+    serializer_class = UserSerializer
+
+    def get_object(self):
+        """
+        Returns the object the view is displaying.
+        """
+        queryset = self.filter_queryset(self.get_queryset())
+
+        filter_kwargs = {self.lookup_field: self.request.user.id}
+        obj = get_object_or_404(queryset, **filter_kwargs)
+
+        # May raise a permission denied
+        self.check_object_permissions(self.request, obj)
+
+        return obj
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop("partial", False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        if getattr(instance, "_prefetched_objects_cache", None):
+            # If 'prefetch_related' has been applied to a queryset, we need to
+            # forcibly invalidate the prefetch cache on the instance.
+            instance._prefetched_objects_cache = {}
+
+        return Response(serializer.data)
+
+
 class UserDeleteView(
     InUserTypeQuerySetMixin,
     InUserTypeSerializerMixin,
@@ -169,15 +209,16 @@ class UserDeleteView(
         instance = self.get_object()
 
         # Execute delete the ids
-        self.perform_destroy(ids)
+        users_deleted = self.perform_destroy(ids)
 
-        msg = {"details": "All the users have been removed!"}
+        msg = {"details": f"Deleted the users: {users_deleted}"}
         return Response(data=msg, status=status.HTTP_204_NO_CONTENT)
 
     def perform_destroy(self, ids):
         queryset = self.filter_queryset(self.get_queryset())
         filter_kwargs = {"pk__in": ids}
         users_deleted = queryset.filter(**filter_kwargs).delete()
+        return users_deleted
 
 
 class UsersListView(
