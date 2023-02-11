@@ -45,5 +45,25 @@ class DeleteMultipleUsers(exceptions.MethodNotAllowed):
     """
 
     def __init__(self, message=None):
-        self.message = "Deleting action not allowed for non admin user" if not message else message
+        self.message = (
+            "Deleting action not for multiple users allowed for non admin user"
+            if not message
+            else message
+        )
+        super().__init__(self.message)
+
+
+class UpdateMultipleUsers(exceptions.MethodNotAllowed):
+    """Exception class for not allowed the action of updating multiple users
+
+    Args:
+        Exception (exceptions.MethodNotAllowed): not allowed
+    """
+
+    def __init__(self, message=None):
+        self.message = (
+            "Updating action for multiple users not allowed for non admin user"
+            if not message
+            else message
+        )
         super().__init__(self.message)
