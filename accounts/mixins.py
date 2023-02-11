@@ -7,7 +7,7 @@ from .factories import (
     UserTypeModelFactory,
     UserTypeSerializerFactory,
 )
-from .permissions import BasePermission, DeleteUserPermission
+from .permissions import BasePermission, DeleteUserPermission, UpdateUserPermission
 
 
 class PermissionMixin:
@@ -16,6 +16,10 @@ class PermissionMixin:
 
 class DeleteUserPermissionMixin:
     permission_classes = [DeleteUserPermission, permissions.IsAuthenticated]
+
+
+class UpdateUserPermissionMixin:
+    permission_classes = [UpdateUserPermission, permissions.IsAuthenticated]
 
 
 class KwargUserTypeQuerySetMixin:
