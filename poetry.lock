@@ -302,6 +302,24 @@ files = [
 ]
 
 [[package]]
+name = "colorlog"
+version = "6.7.0"
+description = "Add colours to the output of Python's logging module."
+category = "dev"
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "colorlog-6.7.0-py2.py3-none-any.whl", hash = "sha256:0d33ca236784a1ba3ff9c532d4964126d8a2c44f1f0cb1d2b0728196f512f662"},
+    {file = "colorlog-6.7.0.tar.gz", hash = "sha256:bd94bd21c1e13fac7bd3153f4bc3a7dc0eb0974b8bc2fdf1a989e474f6e582e5"},
+]
+
+[package.dependencies]
+colorama = {version = "*", markers = "sys_platform == \"win32\""}
+
+[package.extras]
+development = ["black", "flake8", "mypy", "pytest", "types-colorama"]
+
+[[package]]
 name = "cors"
 version = "1.0.1"
 description = "Fast CORS misconfiguration vulnerabilities scanner"
@@ -1306,4 +1324,4 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "09e102f77df32ed3b93006a9f4eb3a8f47156c03b8d3199708ad47fd44ea12d4"
+content-hash = "658bc1139639478025fb9a20d59ce4c978bc514ea0c805c2640d9af93089b878"
