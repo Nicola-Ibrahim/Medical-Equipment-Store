@@ -1,5 +1,5 @@
 [flake8]
-ignore = F401, F811, F821, C101, I201, I101, I100, A003
+ignore = C101, D403, F403, F401, F405, I100, I201, W503, W504, F821, Q000, E501, A001, A003, Q000, T201, I101
 exclude =
     .git,
     __pycache__,
