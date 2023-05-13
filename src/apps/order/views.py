@@ -1,6 +1,11 @@
-from rest_framework.generics import ListAPIView, ListCreateAPIView, RetrieveUpdateDestroyAPIView, UpdateAPIView
+from rest_framework.generics import (
+    ListAPIView,
+    ListCreateAPIView,
+    RetrieveUpdateDestroyAPIView,
+    UpdateAPIView,
+)
 
-from src.apps.accounts.mixins import PermissionMixin
+from apps.accounts.mixins import PermissionMixin
 
 from .mixin import OrderQuerySetMixin
 from .models import Order

@@ -1,6 +1,6 @@
 .PHONY: superuser
 superuser:
-	pipenv run python -m manage makesuperuser
+	pipenv run python manage makesuperuser.py
 
 .PHONY: lint
 lint:
@@ -9,15 +9,15 @@ lint:
 
 .PHONY: migrations
 migrations:
-	poetry run python -m src.manage makemigrations
+	poetry run python src\manage.py makemigrations
 
 .PHONY: migrate
 migrate:
-	poetry run python -m src.manage migrate
+	poetry run python src\manage.py migrate
 
 .PHONY: run-server
 run-server:
-	poetry run python -m src.manage runserver 127.0.0.1:8000
+	poetry run python src\manage.py runserver 127.0.0.1:8000
 
 
 .PHONY: install
@@ -36,17 +36,17 @@ update: migrations migrate	update-pre-commit
 
 .PHONY: shell
 shell:
-	pipenv run python -m manage shell_plus
+	pipenv run python manage shell_plus.py
 
 .PHONY: flush-tokens
 flush-tokens:
-	pipenv run python -m manage flushexpiredtokens
+	pipenv run python manage flushexpiredtokens.py
 
 .PHONY: check-deploy
 check-deploy:
-	pipenv run python -m manage check --deploy
+	pipenv run python manage check.py --deploy
 
 
 .PHONY: db-graph
 db-graph:
-	pipenv run python -m manage graph_models -a -g -o lineup_models_visualized.png
+	pipenv run python manage graph_models.py -a -g -o lineup_models_visualized.png

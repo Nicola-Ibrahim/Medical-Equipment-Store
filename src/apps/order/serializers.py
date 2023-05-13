@@ -1,8 +1,8 @@
 from rest_framework import serializers
 
-from src.apps.accounts.models import User
-from src.apps.accounts.utils import send_msg
-from src.apps.product.models import Product
+from apps.accounts.models import User
+from apps.accounts.utils import send_msg
+from apps.product.models import Product
 
 from .models import Order, OrderProduct
 
@@ -54,7 +54,9 @@ class OrderSerializer(serializers.ModelSerializer):
     """
 
     # Add extra read_only field
-    url = serializers.HyperlinkedIdentityField(view_name="order:details", lookup_field="pk", read_only=True)
+    url = serializers.HyperlinkedIdentityField(
+        view_name="order:details", lookup_field="pk", read_only=True
+    )
     order_id = serializers.ReadOnlyField(source="id")
     doctor_name = serializers.ReadOnlyField(source="doctor.doctor_profile.first_name")
 
@@ -98,7 +100,9 @@ class OrderSerializer(serializers.ModelSerializer):
         for product_details in products:
             product = Product.objects.get(name=product_details["name"])
 
-            availability, available_quantity = product.is_available(consume_quantity=product_details["quantity"])
+            availability, available_quantity = product.is_available(
+                consume_quantity=product_details["quantity"]
+            )
             if not availability:
                 raise serializers.ValidationError(
                     f"You exceed the number of available for the {product.name}:{product.quantity}"

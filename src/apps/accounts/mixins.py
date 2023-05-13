@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from rest_framework import permissions
 
 from .factories import UserTypeFilterFactory, UserTypeModelFactory, UserTypeSerializerFactory
@@ -49,7 +47,9 @@ class KwargUserTypeSerializerMixin:
         """
 
         # Get the serializer
-        serializer_class = UserTypeSerializerFactory().get_suitable_serializer(self.kwargs["user_type"])
+        serializer_class = UserTypeSerializerFactory().get_suitable_serializer(
+            self.kwargs["user_type"]
+        )
 
         return serializer_class
 
@@ -61,7 +61,9 @@ class InUserTypeSerializerMixin:
         """
 
         # Get the serializer
-        serializer_class = UserTypeSerializerFactory().get_suitable_serializer(self.request.user.type.lower())
+        serializer_class = UserTypeSerializerFactory().get_suitable_serializer(
+            self.request.user.type.lower()
+        )
 
         return serializer_class
 

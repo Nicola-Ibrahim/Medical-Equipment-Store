@@ -1,4 +1,4 @@
-from src.apps.accounts.models import User
+from apps.accounts.models import User
 
 
 class OrderQuerySetMixin:

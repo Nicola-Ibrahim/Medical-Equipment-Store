@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from collections import OrderedDict
 
 from django.contrib.auth import authenticate
@@ -7,7 +5,11 @@ from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 
 from .models import DeliveryWorker, Doctor, User, Warehouse
-from .profiles_serializers import DeliveryWorkerProfileSerializer, DoctorProfileSerializer, WarehouseProfileSerializer
+from .profiles_serializers import (
+    DeliveryWorkerProfileSerializer,
+    DoctorProfileSerializer,
+    WarehouseProfileSerializer,
+)
 
 
 class UserSerializer(serializers.ModelSerializer):

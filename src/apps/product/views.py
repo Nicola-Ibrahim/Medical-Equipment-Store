@@ -1,10 +1,15 @@
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import OrderingFilter
-from rest_framework.generics import ListAPIView, ListCreateAPIView, RetrieveUpdateDestroyAPIView, UpdateAPIView
+from rest_framework.generics import (
+    ListAPIView,
+    ListCreateAPIView,
+    RetrieveUpdateDestroyAPIView,
+    UpdateAPIView,
+)
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.views import APIView
 
-from src.apps.accounts.mixins import PermissionMixin
+from apps.accounts.mixins import PermissionMixin
 
 from .filters import ProductFilter
 from .mixins import ProductQuerySetMixin, ProductsSoldQuerySetMixin

@@ -8,10 +8,10 @@ from django.urls import include, path
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("api/accounts/", include("src.apps.accounts.urls"), name="accounts"),
-    path("api/product/", include("src.apps.product.urls"), name="product"),
-    path("api/order/", include("src.apps.order.urls"), name="order"),
-    path("api/notification/", include("src.apps.notification.urls"), name="notification"),
+    path("api/accounts/", include("apps.accounts.urls"), name="accounts"),
+    path("api/product/", include("apps.product.urls"), name="product"),
+    path("api/order/", include("apps.order.urls"), name="order"),
+    path("api/notification/", include("apps.notification.urls"), name="notification"),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

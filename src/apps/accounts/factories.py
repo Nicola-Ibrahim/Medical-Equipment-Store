@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from abc import ABC, abstractmethod
 
 import django_filters.rest_framework as filters
@@ -7,7 +5,12 @@ import django_filters.rest_framework as filters
 from .errors import UserFilterNotFound, UserModelNotFound, UserSerializerNotFound
 from .filters import DeliveryWorkerFilter, DoctorFilter, UserFilter, WarehouseFilter
 from .models import DeliveryWorker, Doctor, User, Warehouse
-from .serializers import DeliveryWorkerUserSerializer, DoctorUserSerializer, UserSerializer, WarehouseUserSerializer
+from .serializers import (
+    DeliveryWorkerUserSerializer,
+    DoctorUserSerializer,
+    UserSerializer,
+    WarehouseUserSerializer,
+)
 
 
 class ModelFactory(ABC):

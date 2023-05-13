@@ -1,3 +1,6 @@
+"""Third-party package configuration settings"""
+
+
 from datetime import timedelta
 
 INSTALLED_APPS += ("rest_framework_simplejwt",)  # type: ignore # noqa: F821

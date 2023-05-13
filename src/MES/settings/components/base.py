@@ -1,7 +1,13 @@
+"""Base settings file
+
+This file contains the base settings for the Django project.
+Default values are assigned to base settings that can be overridden by other settings files.
+"""
+
 SECRET_KEY = NotImplemented
 DEBUG = False
 
-ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
+ALLOWED_HOSTS = []
 
 # Application definition
 
@@ -14,10 +20,10 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django_filters",
     # Created apps
-    "src.apps.accounts",
-    "src.apps.product",
-    "src.apps.order",
-    "src.apps.notification",
+    "apps.accounts",
+    "apps.product",
+    "apps.order",
+    "apps.notification",
 ]
 
 MIDDLEWARE = [
@@ -31,7 +37,7 @@ MIDDLEWARE = [
     # "accounts.middleware.edit_url.EditUrlMiddleware",
 ]
 
-ROOT_URLCONF = "src.home.urls"
+ROOT_URLCONF = "MES.urls"
 
 TEMPLATES = [
     {
@@ -49,7 +55,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "src.home.wsgi.application"
+WSGI_APPLICATION = "MES.wsgi.application"
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
@@ -92,5 +98,5 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 AUTH_USER_MODEL = "accounts.User"
 
-MEDIA_ROOT = BASE_DIR / "media"  # type: ignore
+MEDIA_ROOT = BASE_DIR / "media"
 MEDIA_URL = "/media/"

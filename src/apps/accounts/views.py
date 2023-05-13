@@ -1,4 +1,5 @@
 import jwt
+from django.conf import settings
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.generics import (
@@ -13,9 +14,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from src.apps.accounts.services import send_verification
-from src.home import settings
-
+from . import services
 from .mixins import (
     DeleteUserPermissionMixin,
     FilterMixin,
@@ -101,6 +100,7 @@ class UserSignView(KwargUserTypeSerializerMixin, CreateAPIView):
 
         user_data = serializer.data
         # Send verification message to user's email
+        services.VerificationMailer()
         send_verification(user_data=user_data, request=request)
 
         return Response(user_data, status=status.HTTP_201_CREATED)

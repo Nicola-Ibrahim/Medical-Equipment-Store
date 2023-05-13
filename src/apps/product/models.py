@@ -1,8 +1,8 @@
 from django.core.validators import MinValueValidator
 from django.db import models
 
-from src.apps.accounts.models import Warehouse
-from src.apps.accounts.utils import slugify_instance_name
+from apps.accounts.models import Warehouse
+from apps.accounts.utils import slugify_instance_name
 
 
 def upload_to(instance, filename):
@@ -20,7 +20,12 @@ class Product(models.Model):
     quantity = models.IntegerField(validators=[MinValueValidator(1)])
     discount = models.FloatField(default=0, validators=[MinValueValidator(0)])
     image = models.ImageField(
-        upload_to=upload_to, height_field=None, width_field=None, max_length=None, blank=True, null=True
+        upload_to=upload_to,
+        height_field=None,
+        width_field=None,
+        max_length=None,
+        blank=True,
+        null=True,
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import django_filters.rest_framework as filters
 
 from .models import DeliveryWorker, Doctor, User, Warehouse

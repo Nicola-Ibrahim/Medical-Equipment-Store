@@ -11,7 +11,7 @@ def main():
 
     dotenv.load_dotenv()
 
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "src.home.settings")
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "MES.settings")
 
     try:
         from django.core.management import execute_from_command_line

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from src.apps.accounts.models import Warehouse
+from apps.accounts.models import Warehouse
 
 from .models import Product
 

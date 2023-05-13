@@ -1,7 +1,7 @@
 from django.db import models
 
-from src.apps.accounts.models import DeliveryWorker, Doctor
-from src.apps.product.models import Product
+from apps.accounts.models import DeliveryWorker, Doctor
+from apps.product.models import Product
 
 
 class Order(models.Model):
@@ -37,7 +37,9 @@ class Order(models.Model):
 
 class OrderProduct(models.Model):
     order = models.ForeignKey(Order, related_name="order_set", on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, related_name="product_set", on_delete=models.SET_NULL, null=True)
+    product = models.ForeignKey(
+        Product, related_name="product_set", on_delete=models.SET_NULL, null=True
+    )
     quantity = models.IntegerField(default=1)
     price = models.FloatField(null=True, blank=True)
 

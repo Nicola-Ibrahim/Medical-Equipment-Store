@@ -1,7 +1,7 @@
 from django.db.models import Sum
 
-from src.apps.accounts.models import User
-from src.apps.order.models import Order
+from apps.accounts.models import User
+from apps.order.models import Order
 
 from .models import Product
 
@@ -40,7 +40,11 @@ class ProductsSoldQuerySetMixin:
 
         if self.request.user.type == User.Type.ADMIN:
             lookup_values = ["name", "warehouse"]
-            qs = Product.objects.values(*lookup_values).annotate(sold_count=Sum("product_set__quantity")).order_by()
+            qs = (
+                Product.objects.values(*lookup_values)
+                .annotate(sold_count=Sum("product_set__quantity"))
+                .order_by()
+            )
 
         if self.request.user.type == User.Type.WAREHOUSE:
             lookup_filter = dict()
