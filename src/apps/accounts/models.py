@@ -5,35 +5,20 @@ proxy models of multiple users type
 other models related to user
 """
 
-from itertools import chain
+from datetime import timedelta
 
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import validate_email
 from django.db import models
+from django.utils import timezone
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .models_manager import CustomUserManager, ProxyUserManger
+from . import managers, utils
 
 
-class PrintableModel(models.Model):
-    def __repr__(self):
-        return str(self.to_dict())
-
-    def to_dict(instance):
-        opts = instance._meta
-        data = {}
-        for f in chain(opts.concrete_fields, opts.private_fields):
-            data[f.name] = f.value_from_object(instance)
-        for f in opts.many_to_many:
-            data[f.name] = [i.id for i in f.value_from_object(instance)]
-        return data
-
-    class Meta:
-        abstract = True
-
-
-class User(AbstractUser, PrintableModel):
-    objects = CustomUserManager()
+class User(AbstractUser):
+    objects = managers.CustomUserManager()
 
     class Type(models.TextChoices):
         DOCTOR = "Doctor", "doctor"
@@ -83,7 +68,7 @@ class Doctor(User):
     class Meta:
         proxy = True
 
-    objects = ProxyUserManger(User.Type.DOCTOR)
+    objects = managers.ProxyUserManger(User.Type.DOCTOR)
 
     def save(self, *args, **kwargs) -> None:
         self.type = User.Type.DOCTOR
@@ -94,7 +79,7 @@ class DeliveryWorker(User):
     class Meta:
         proxy = True
 
-    objects = ProxyUserManger(User.Type.DELIVERY_WORKER)
+    objects = managers.ProxyUserManger(User.Type.DELIVERY_WORKER)
 
     def save(self, *args, **kwargs) -> None:
         self.type = User.Type.DELIVERY_WORKER
@@ -105,7 +90,7 @@ class Warehouse(User):
     class Meta:
         proxy = True
 
-    objects = ProxyUserManger(User.Type.WAREHOUSE)
+    objects = managers.ProxyUserManger(User.Type.WAREHOUSE)
 
     def save(self, *args, **kwargs) -> None:
         self.type = User.Type.WAREHOUSE
@@ -116,7 +101,7 @@ class WarehouseAccountant(User):
     class Meta:
         proxy = True
 
-    objects = ProxyUserManger(User.Type.WAREHOUSE_ACCOUNTANT)
+    objects = managers.ProxyUserManger(User.Type.WAREHOUSE_ACCOUNTANT)
 
     def save(self, *args, **kwargs) -> None:
         self.type = User.Type.WAREHOUSE_ACCOUNTANT
@@ -127,7 +112,7 @@ class DeliveryWorkerAccountant(User):
     class Meta:
         proxy = True
 
-    objects = ProxyUserManger(User.Type.DELIVERY_WORKER_ACCOUNTANT)
+    objects = managers.ProxyUserManger(User.Type.DELIVERY_WORKER_ACCOUNTANT)
 
     def save(self, *args, **kwargs) -> None:
         self.type = User.Type.DELIVERY_WORKER_ACCOUNTANT
@@ -138,7 +123,7 @@ class BaseAccountant(User):
     class Meta:
         proxy = True
 
-    objects = ProxyUserManger(User.Type.BASE_ACCOUNTANT)
+    objects = managers.ProxyUserManger(User.Type.BASE_ACCOUNTANT)
 
     def save(self, *args, **kwargs) -> None:
         self.type = User.Type.BASE_ACCOUNTANT
@@ -149,7 +134,7 @@ class Statistician(User):
     class Meta:
         proxy = True
 
-    objects = ProxyUserManger(User.Type.STATISTICIAN)
+    objects = managers.ProxyUserManger(User.Type.STATISTICIAN)
 
     def save(self, *args, **kwargs) -> None:
         self.type = User.Type.STATISTICIAN
@@ -160,7 +145,7 @@ class Admin(User):
     class Meta:
         proxy = True
 
-    objects = ProxyUserManger(User.Type.ADMIN)
+    objects = managers.ProxyUserManger(User.Type.ADMIN)
 
     def save(self, *args, **kwargs) -> None:
         self.is_staff = True
@@ -176,3 +161,60 @@ class Subscription(models.Model):
 
     def __str__(self) -> str:
         return self.type
+
+
+class OTPNumber(models.Model):
+    number = models.CharField(max_length=16, null=True)
+    is_verified = models.BooleanField(default=False)
+    valid_until = models.DateTimeField(
+        default=timezone.now,
+        help_text="The timestamp of the moment of expiry of the saved number.",
+    )
+
+    user = models.ForeignKey(
+        to="User",
+        related_name="otp_number",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
+
+    def save(self, *args, **kwargs) -> None:
+        self.valid_until = timezone.now() + timedelta(seconds=settings.OTP_EXPIRATION)
+        return super().save(*args, **kwargs)
+
+    def __str__(self) -> str:
+        return f"{self.user.full_name} - {self.number}"
+
+    def check_num(self, number: str) -> bool:
+        """Verifies a number by content and expiry.
+
+        Args:
+            number (str): the number which to be checked
+
+        Returns:
+            bool: success or fail
+        """
+        _now = timezone.now()
+
+        if (self.number is not None) and (number == self.number) and (_now < self.valid_until):
+            # self.number = None
+            self.valid_until = _now
+            self.save()
+
+            return True
+        else:
+            return False
+
+    @staticmethod
+    def get_number(length=6) -> str:
+        """Generate an OTP number for the user.
+
+        Args:
+            length (int, optional): The number of digits to return. Defaults to 6.
+
+        Returns:
+            str: A string of decimal digits
+        """
+
+        return utils.generate_random_number(length)

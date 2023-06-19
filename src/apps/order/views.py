@@ -5,7 +5,7 @@ from rest_framework.generics import (
     UpdateAPIView,
 )
 
-from apps.accounts.mixins import PermissionMixin
+from apps.accounts.api.mixins import PermissionMixin
 
 from .mixin import OrderQuerySetMixin
 from .models import Order
